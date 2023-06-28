@@ -2,7 +2,6 @@
 vicreg:
   base_lr: 0.2
   projector: 512-8196-8196-8196 # 8196 for each layer in VICReg
-  embedding: 768 # 2048 in VICReg
   weight_decay: 0.000001
   sim_coeff: 25
   std_coeff: 25
