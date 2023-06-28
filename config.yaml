@@ -1,0 +1,36 @@
+# VICReg
+vicreg:
+  base_lr: 0.2
+  projector: 512-8196-8196-8196 # 8196 for each layer in VICReg
+  embedding: 768 # 2048 in VICReg
+  weight_decay: 0.000001
+  sim_coeff: 25
+  std_coeff: 25
+  cov_coeff: 1
+
+  batch_size: 768
+  model: small
+
+# Evaluation
+evaluation:
+  batch_size: 256
+  lr: 0.001
+  weight_decay : 0.000001
+  linear: 1
+  percentage: 1.0
+  seed: 42
+
+# training general
+general: 
+  epochs: 1000
+  num_workers: 12
+  preload_train_dataset: False
+  preload_val_dataset: False
+  accelerator: tpu
+  devices: 8
+  precision: bf16-mixed
+  check_val_every_n_epoch: 20
+
+  sample_rate: 22050
+  hop_length: 128
+  win_length: 250 
