@@ -11,7 +11,7 @@ from modules.VICReg import VICReg
 from torch.utils.data import DataLoader
 from transforms import AudioSplit, get_transforms
 from utils import get_dataset, get_model_name, get_model_number
-
+#
 from data.preloaded_dataset import PreloadedDataset
 
 
@@ -41,7 +41,7 @@ def main(args):
      ############################
     # model
     ############################
-    backbone = convnext(args.backbone, pretrained=args.pretrained)
+    backbone = convnext(args.model, pretrained=args.pretrained)
     model = VICReg(args, backbone)
     ############################
     # transforms
