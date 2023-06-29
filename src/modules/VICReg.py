@@ -1,6 +1,7 @@
 from typing import Tuple
 import numpy as np
 import torch
+from torch import Tensor
 import torch.nn.functional as F
 import lightning as L
 
@@ -19,12 +20,12 @@ class VICReg(L.LightningModule):
         self.val_outputs = []
         self.train_outputs = []
 
-    def internal_forward(self, x: torch.Tensor, y: torch.Tensor) -> Tuple[torch.Tensor]:
+    def internal_forward(self, x: Tensor, y: Tensor) -> Tuple[Tensor, Tensor]:
         x = self.projector(self.backbone(x))
         y = self.projector(self.backbone(y))
         return x, y
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         x = self.backbone(x)
         return x
 

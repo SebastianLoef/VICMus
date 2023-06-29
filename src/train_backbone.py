@@ -4,7 +4,7 @@ import yaml
 import lightning as L
 
 from utils import save_parameters
-from architectures import Projector, convnext
+from architectures import convnext
 from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.loggers import WandbLogger
 from modules.VICReg import VICReg
@@ -42,7 +42,7 @@ def main(args):
     # model
     ############################
     backbone = convnext(args.backbone, pretrained=args.pretrained)
-    model = VICReg(args, backbone, Projector)
+    model = VICReg(args, backbone)
     ############################
     # transforms
     ############################
