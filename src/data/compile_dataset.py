@@ -13,18 +13,17 @@ def compile_MagnaTagaTune():
 
     # if not, compile it
     # unzip mp3 files
-    if not os.path.exists("data/processed/MagnaTagATune/"):
-        os.system("unzip data/raw/mp3.zip -d data/processed/MagnaTagATune/")
-        os.system(
-            f"cp data/raw/clip_info_final.csv"
-            f"data/raw/annotations_final.csv"
-            f"data/processed/MagnaTagATune/"
-        )
-        for file in ["train", "test", "valid", "binary", "tags"]:
-            os.system(f"cp data/raw/{file}.npy data/processed/MagnaTagATune/")
+    os.system("unzip data/raw/mp3.zip -d data/processed/MagnaTagATune/")
+    os.system(
+        f"cp data/raw/clip_info_final.csv"
+        f"data/raw/annotations_final.csv"
+        f"data/processed/MagnaTagATune/"
+    )
+    for file in ["train", "test", "valid", "binary", "tags"]:
+        os.system(f"cp data/raw/{file}.npy data/processed/MagnaTagATune/")
 
-        for file in ["train_gt", "test_gt", "val_gt", "index"]:
-            os.system(f"cp data/raw/{file}_mtt.tsv data/processed/MagnaTagATune/")
+    for file in ["train_gt", "test_gt", "val_gt", "index"]:
+        os.system(f"cp data/raw/{file}_mtt.tsv data/processed/MagnaTagATune/")
 
     # Extract the top 50 most common tags from annotations
     tags = pd.read_csv("data/raw/annotations_final.csv", sep="\t")
