@@ -63,8 +63,8 @@ def main(args):
     # dataset
     ############################
 
-    train_dataset = get_dataset(args.encoder_train_dataset)
-    val_dataset = get_dataset(args.encoder_val_dataset)
+    train_dataset = get_dataset(args.train_dataset)
+    val_dataset = get_dataset(args.val_dataset)
 
     if args.preload_train_dataset:
         train_dataset = train_dataset(subset="train", transforms=None)
