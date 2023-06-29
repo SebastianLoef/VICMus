@@ -15,7 +15,7 @@ class MagnaTagATune(Dataset):
     def __init__(
         self,
         subset: str,
-        root: str = "../../data/processed/MagnaTagATune/",
+        root: str = "data/processed/MagnaTagATune/",
         sample_rate: int = 22050,
         transforms=None,
         **kwargs,
