@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -147,12 +149,22 @@ model_urls = {
     "convnext_xlarge_22k": "https://dl.fbaipublicfiles.com/convnext/convnext_xlarge_22k_224.pth",
 }
 
+# Function that removes channels from the pretrained weights in the first layer
+def remove_first_layer_channels(state_dict, num_channels):
+    new_state_dict = OrderedDict()
+    for k, v in state_dict.items():
+        if k.startswith("downsample_layers.0.0.weight"):
+            v = v[:, :num_channels, :, :]
+        new_state_dict[k] = v
+    return new_state_dict
+
 @register_model
 def convnext_tiny(pretrained=False,in_22k=False, **kwargs):
     model = ConvNeXt(depths=[3, 3, 9, 3], dims=[96, 192, 384, 768], **kwargs)
     if pretrained:
         url = model_urls['convnext_tiny_22k'] if in_22k else model_urls['convnext_tiny_1k']
         checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True)
+        checkpoint["model"] = remove_first_layer_channels(checkpoint["model"], num_channels=1)
         model.load_state_dict(checkpoint["model"], strict=False)
     return model
 
@@ -162,6 +174,7 @@ def convnext_small(pretrained=False,in_22k=False, **kwargs):
     if pretrained:
         url = model_urls['convnext_small_22k'] if in_22k else model_urls['convnext_small_1k']
         checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu")
+        checkpoint["model"] = remove_first_layer_channels(checkpoint["model"], num_channels=1)
         model.load_state_dict(checkpoint["model"], strict=False)
     return model
 
@@ -171,6 +184,7 @@ def convnext_base(pretrained=False, in_22k=False, **kwargs):
     if pretrained:
         url = model_urls['convnext_base_22k'] if in_22k else model_urls['convnext_base_1k']
         checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu")
+        checkpoint["model"] = remove_first_layer_channels(checkpoint["model"], num_channels=1)
         model.load_state_dict(checkpoint["model"], strict=False)
     return model
 
@@ -180,6 +194,7 @@ def convnext_large(pretrained=False, in_22k=False, **kwargs):
     if pretrained:
         url = model_urls['convnext_large_22k'] if in_22k else model_urls['convnext_large_1k']
         checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu")
+        checkpoint["model"] = remove_first_layer_channels(checkpoint["model"], num_channels=1)
         model.load_state_dict(checkpoint["model"], strict=False)
     return model
 
