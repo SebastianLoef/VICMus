@@ -10,3 +10,4 @@ git+https://github.com/Spijkervet/torchaudio-augmentations
 names
 scikit-learn
 opendatasets
+timm
