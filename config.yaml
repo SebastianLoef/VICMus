@@ -1,7 +1,7 @@
 # VICReg
 vicreg:
   base_lr: 0.2
-  projector: 512-8196-8196-8196 # 8196 for each layer in VICReg
+  projector: 768-8196-8196-8196 # 768 for smoll
   weight_decay: 0.000001
   sim_coeff: 25
   std_coeff: 25
