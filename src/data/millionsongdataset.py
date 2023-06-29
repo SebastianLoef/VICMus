@@ -7,6 +7,8 @@ from typing import Tuple
 from torchaudio.transforms import Resample
 
 class MillionSongDataset(Dataset):
+    MULTI_LABEL = True
+    NUM_LABELS = 50
     def __init__(self,
                  subset: str,
                  root: str="data/processed/msd/audio/",

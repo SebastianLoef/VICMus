@@ -37,6 +37,8 @@ def get_transforms(
             RandomApply([Reverb(sample_rate=sample_rate)], p=0.6),
             transforms.MelSpectrogram(
                 sample_rate=sample_rate,
+                win_length=win_length,
+                hop_length=hop_length,
             ),
         ]
     )
@@ -49,7 +51,6 @@ class AudioSplit(nn.Module):
         normal: bool = False,
         return_idxs: bool = False,
         transforms: Union[Compose, None] = get_transforms(),
-        k: int = 27,
         n_samples: int = 59049,
     ):
         super().__init__()

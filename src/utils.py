@@ -7,7 +7,6 @@ from types import SimpleNamespace
 
 from data.gtzan import GTZAN
 from data.magnatagatune import MagnaTagATune
-from data.freemusicarchive import FreeMusicArchive
 from data.millionsongdataset import MillionSongDataset
 
 
@@ -34,7 +33,7 @@ def get_best_metric_checkpoint_path(name: str, metric: str) -> str:
     return path + model_names[0]
 
 
-def get_epoch_checkpoint_path(name: str, epoch: int = None) -> str:
+def get_epoch_checkpoint_path(name: str, epoch: int = 0) -> str:
     model_names = glob.glob(f"data/models/{name}/*epoch*")
     assert len(model_names) > 0, "No models found"
     d = {int(re.split("=|\.", model_name)[1]): model_name for model_name in model_names}
@@ -52,9 +51,6 @@ def get_dataset(name: str):
     elif name == "gtzan":
         print("Using GTZAN dataset")
         return GTZAN
-    elif name == "freemusicarchive":
-        print("Using FreeMusicArchive dataset")
-        return FreeMusicArchive
     elif name == "msd":
         print("Using MillionSongDataset dataset")
         return MillionSongDataset

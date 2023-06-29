@@ -7,7 +7,7 @@ from lightning.pytorch.loggers import WandbLogger
 from torch.utils.data import DataLoader
 from torchaudio_augmentations import RandomResizedCrop
 
-from architectures import Projector, SampleCNN
+from architectures import mlp, convnext
 from modules.Classifier import Classifier
 from modules.VICReg import VICReg
 
@@ -116,14 +116,11 @@ def main(args):
 
     backbone_args = load_parameters(args.name)
     # print(torch.load(backbone_path)["state_dict"])
-    if backbone_args.backbone == "samplecnn":
-        backbone_arch = SampleCNN
-    else:
-        backbone_arch = SampleCNN
     backbone_module = VICReg.load_from_checkpoint(
-        backbone_path, args=backbone_args, backbone=backbone_arch, projector=Projector
+        backbone_path,
+        args=backbone_args,
+        backbone=convnext(backbone_args.model, pretrained=False),
     )
-    # backbone_module = VICReg.load_from_checkpoint(backbone_path, args=backbone_args)
     backbone = backbone_module.backbone.cpu()
     model = Classifier(
         args, MULTILABELS, NUM_LABELS, backbone, embedding=backbone_args.embedding
