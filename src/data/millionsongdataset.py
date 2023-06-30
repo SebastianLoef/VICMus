@@ -38,7 +38,7 @@ class MillionSongDataset(Dataset):
         return audio, FloatTensor(0)
 
     def _get_song_list(self):
-        fl_path = os.path.join(self.meta_path, self.subset + '_filepaths.npy')
+        fl_path = os.path.join(self.meta_path, self.subset + '_filepaths.csv')
         df = pd.read_csv(fl_path)
         self.fl = df['filepath'].values
     
