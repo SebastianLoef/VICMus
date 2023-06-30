@@ -26,9 +26,9 @@ class MillionSongDataset(Dataset):
     def __getitem__(self, index) -> Tuple[Tensor, FloatTensor]:
         audio_path = os.path.join(self.root, self.fl[index])
         
-        try 
+        try:
             audio, sr = torchaudio.load(audio_path, format='mp3')
-        except: 
+        except Exception: 
             os.system(f"{self.fl[index]} > data/processed/MSD/failed.txt")
             return self.__getitem__(index + 1)
         if sr != self.sample_rate:
