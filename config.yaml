@@ -24,7 +24,7 @@ evaluation:
 general: 
   epochs: 1000
   num_workers: 12
-  train_dataset: magnatagatune
+  train_dataset: msd
   val_dataset: magnatagatune
   preload_train_dataset: False
   preload_val_dataset: False
