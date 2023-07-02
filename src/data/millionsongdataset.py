@@ -21,6 +21,7 @@ class MillionSongDataset(Dataset):
         self.subset = subset
         self.sample_rate = sample_rate
         self.transforms = transforms
+        print(f"{self.meta_path} {self.subset}")
         self._get_song_list()
 
     def __getitem__(self, index) -> Tuple[Tensor, FloatTensor]:
@@ -28,6 +29,8 @@ class MillionSongDataset(Dataset):
         
         try:
             audio, sr = torchaudio.load(audio_path, format='mp3')
+            if audio.shape[0] < 59049:
+                raise Exception
         except Exception: 
             os.system(f"{self.fl[index]} > data/processed/MSD/failed.txt")
             return self.__getitem__(index + 1)
@@ -45,7 +48,7 @@ class MillionSongDataset(Dataset):
     def _get_song_list(self):
         fl_path = os.path.join(self.meta_path, self.subset + '_filepaths.csv')
         df = pd.read_csv(fl_path)
-        self.fl = df['0'].values
+        self.fl = df['0'].str[1:].values
     
     def __len__(self):
         return len(self.fl)

@@ -35,11 +35,6 @@ def get_transforms(
                 p=0.6,
             ),
             RandomApply([Reverb(sample_rate=sample_rate)], p=0.6),
-            transforms.MelSpectrogram(
-                sample_rate=sample_rate,
-                win_length=win_length,
-                hop_length=hop_length,
-            ),
         ]
     )
     return transform
@@ -50,22 +45,27 @@ class AudioSplit(nn.Module):
         self,
         normal: bool = False,
         return_idxs: bool = False,
-        transforms: Union[Compose, None] = get_transforms(),
+        transform: Union[Compose, None] = get_transforms(),
         n_samples: int = 59049,
     ):
         super().__init__()
         self.split = RandomResizedCrop(n_samples=n_samples)
         self.normal = normal
-        self.transforms = transforms
+        self.transforms = transform
         self.return_idxs = return_idxs
+        self.mel = transforms.MelSpectrogram(
+            sample_rate=22050, win_length=250, hop_length=128
+        ) 
 
     @torch.no_grad()
     def forward(self, waveform: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         waveform1 = self.split(waveform)
         waveform2 = self.split(waveform)
         if self.transforms is not None:
-            melspec1 = self.transforms(waveform1)
-            melspec2 = self.transforms(waveform2)
+            waveform1 = self.transforms(waveform1)
+            waveform2 = self.transforms(waveform2)
+        melspec1 = self.mel(waveform1)
+        melspec2 = self.mel(waveform2)
         return melspec1, melspec2
 
 
