@@ -18,7 +18,7 @@ from torchaudio_augmentations import (
 
 
 def get_transforms(
-    num_samples: int = 59049,
+    num_samples: int = 65024,
     sample_rate: int = 22050,
     win_length: int = 250,
     hop_length: int = 128,
@@ -46,15 +46,15 @@ class AudioSplit(nn.Module):
         normal: bool = False,
         return_idxs: bool = False,
         transform: Union[Compose, None] = get_transforms(),
-        n_samples: int = 59049,
+        n_samples: int = 65024,
     ):
         super().__init__()
         self.split = RandomResizedCrop(n_samples=n_samples)
         self.normal = normal
         self.transforms = transform
         self.return_idxs = return_idxs
-        self.mel = transforms.MelSpectrogram(
-            sample_rate=22050, win_length=250, hop_length=128
+        self.mel = transforms.MelSpectrogram(n_fft=1024,win_length = 1024, hop_length = 512 , f_min = 20, f_max = 11000,
+            sample_rate=22050
         ) 
 
     @torch.no_grad()

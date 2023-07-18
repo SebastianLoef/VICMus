@@ -29,20 +29,20 @@ class MillionSongDataset(Dataset):
         
         try:
             audio, sr = torchaudio.load(audio_path, format='mp3')
-            if audio.shape[0] < 59049:
+            if sr != self.sample_rate:
+                transform = Resample(sr, self.sample_rate)
+                audio = transform(audio)
+            if audio.shape[-1] < 65024 + 1:
                 raise Exception
         except Exception: 
-            os.system(f"{self.fl[index]} > data/processed/MSD/failed.txt")
-            return self.__getitem__(index + 1)
-        if sr != self.sample_rate:
-            transform = Resample(sr, self.sample_rate)
-            audio = transform(audio)
+            os.system(f"echo {self.fl[index]} >> data/processed/MSD/failed.txt")
+            return self.__getitem__((index + 1) % len(self))
+        
         
         audio = audio.mean(dim=0, keepdim=True)
 
         if self.transforms:
             audio = self.transforms(audio)
-
         return audio, FloatTensor(0)
 
     def _get_song_list(self):

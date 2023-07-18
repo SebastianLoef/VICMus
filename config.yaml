@@ -23,7 +23,7 @@ evaluation:
 # training general
 general: 
   epochs: 1000
-  num_workers: 12
+  num_workers: 6
   train_dataset: msd
   val_dataset: magnatagatune
   preload_train_dataset: False
@@ -31,8 +31,8 @@ general:
   accelerator: tpu
   devices: 8
   precision: bf16-mixed
-  check_val_every_n_epoch: 20
+  check_val_every_n_epoch: 1
 
   sample_rate: 22050
   hop_length: 128
-  win_length: 250 
+  win_length: 250

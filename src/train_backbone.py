@@ -67,16 +67,16 @@ def main(args):
     val_dataset = get_dataset(args.val_dataset)
 
     if args.preload_train_dataset:
-        train_dataset = train_dataset(subset="train", transform=None)
+        train_dataset = train_dataset(subset="train", transforms=None)
         train_dataset = PreloadedDataset(train_dataset, transforms=transforms_train)
     else:
-        train_dataset = train_dataset(subset="train", transform=transforms_train)
+        train_dataset = train_dataset(subset="train", transforms=transforms_train)
 
     if args.preload_val_dataset:
-        val_dataset = val_dataset(subset="valid", transform=None)
+        val_dataset = val_dataset(subset="valid", transforms=None)
         val_dataset = PreloadedDataset(val_dataset, transforms=transforms_val)
     else:
-        val_dataset = val_dataset(subset="valid", transform=transforms_val)
+        val_dataset = val_dataset(subset="valid", transforms=transforms_val)
 
     train_dataloader = DataLoader(
         train_dataset,
