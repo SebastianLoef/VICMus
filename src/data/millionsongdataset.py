@@ -44,13 +44,31 @@ class MillionSongDataset(Dataset):
         broken_fl_path = os.path.join(self.meta_path, 'broken_filepaths.csv')
         df_broken = pd.read_csv(broken_fl_path, header=None)
 
-        
-        df = pd.merge(df, df_broken, on=['0','0'], how='outer', indicator=True)
-            .query("_merge != 'both'")
-            .drop('_merge', axis=1)
-            .reset_index(drop=True)
+        # removes broken filepaths 
+        df = (pd.merge(df, df_broken, on=[0,0], how='outer', indicator=True)
+                .query("_merge == 'left_only'")
+                .drop('_merge', axis=1)
+                .reset_index(drop=True))
 
-        self.fl = df.values
+        self.fl = df[0].values
     
     def __len__(self):
         return len(self.fl)
+
+
+if __name__ == '__main__':
+    dataset = MillionSongDataset()
+    print(len(dataset))
+    print(dataset[0])
+    print(dataset[0][1].shape)
+    print(dataset[0][1])
+    print(dataset[0][1].dtype)
+    print(dataset[0][0].dtype)
+    print(dataset[0][0].shape)
+    print(dataset[0][0].max())
+    print(dataset[0][0].min())
+    print(dataset[0][0].mean())
+    print(dataset[0][0].std())
+    print(dataset[0][0].median())
+    print(dataset[0][0].var())
+    print(dataset[0][0].sum())
