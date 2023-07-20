@@ -15,7 +15,7 @@ class MillionSongDataset(Dataset):
                  meta_path: str="data/processed/MSD/", 
                  sample_rate: int=22050,
                  transforms=None,
-                 **kwargs) -> None:
+                 ) -> None:
         self.root = root
         self.meta_path = meta_path
         self.subset = subset
@@ -40,6 +40,16 @@ class MillionSongDataset(Dataset):
     def _get_song_list(self):
         fl_path = os.path.join(self.meta_path, self.subset + '_filepaths.csv')
         df = pd.read_csv(fl_path, header=None)
+        
+        broken_fl_path = os.path.join(self.meta_path, 'broken_filepaths.csv')
+        df_broken = pd.read_csv(broken_fl_path, header=None)
+
+        
+        df = pd.merge(df, df_broken, on=['0','0'], how='outer', indicator=True)
+            .query("_merge != 'both'")
+            .drop('_merge', axis=1)
+            .reset_index(drop=True)
+
         self.fl = df.values
     
     def __len__(self):
