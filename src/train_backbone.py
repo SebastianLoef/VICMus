@@ -6,7 +6,7 @@ import lightning as L
 from utils import save_parameters
 from architectures import convnext
 from lightning.pytorch.callbacks import ModelCheckpoint
-from lightning.pytorch.loggers import WandbLogger
+#from lightning.pytorch.loggers import WandbLogger
 from modules.VICReg import VICReg
 from torch.utils.data import DataLoader
 from transforms import AudioSplit, get_transforms
@@ -43,7 +43,10 @@ def main(args):
     ############################
     # model
     ############################
-    backbone = convnext(args.model, pretrained=args.pretrained)
+    from torchvision.models import resnet50
+    import torch.nn as nn
+    backbone = resnet50()
+    #backbone = convnext(args.model, pretrained=args.pretrained)
     model = VICReg(args, backbone)
     ############################
     # transforms
@@ -55,8 +58,8 @@ def main(args):
     ############################
     # Logging
     ############################
-    wandb_logger = WandbLogger(project=args.loss, name=name, save_dir="data/logs")
-    wandb_logger.experiment.config.update(args.__dict__, allow_val_change=True)
+    #wandb_logger = WandbLogger(project=args.loss, name=name, save_dir="data/logs")
+    #wandb_logger.experiment.config.update(args.__dict__, allow_val_change=True)
     if args.devices > 1:
         args.batch_size = int(args.batch_size / args.devices)
     ############################
@@ -83,8 +86,8 @@ def main(args):
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=args.num_workers,
-        pin_memory=True,
-        persistent_workers=True,
+        #pin_memory=True,
+        #persistent_workers=True,
         drop_last=True,
     )
     val_dataloader = DataLoader(
@@ -140,9 +143,10 @@ def main(args):
     # Training
     ############################
     compiled_model = model  ##torch.compile(model)
+    from lightning.pytorch.strategies import XLAStrategy, SingleTPUStrategy
     trainer = L.Trainer(
-        callbacks=checkpoint_callbacks,
-        logger=wandb_logger,
+        #callbacks=checkpoint_callbacks,
+        #logger=wandb_logger,
         max_epochs=args.epochs,
         accelerator=args.accelerator,
         devices=args.devices,
@@ -150,11 +154,13 @@ def main(args):
         num_sanity_val_steps=0,
         log_every_n_steps=10,
         check_val_every_n_epoch=args.check_val_every_n_epoch,
+        #profiler="xla",
+        strategy=SingleTPUStrategy(device=1),
     )
     trainer.fit(
         compiled_model,
         train_dataloaders=train_dataloader,
-        val_dataloaders=val_dataloader,
+        #val_dataloaders=val_dataloader,
     )
 
 

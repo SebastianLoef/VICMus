@@ -65,7 +65,9 @@ class AudioSplit(nn.Module):
             waveform1 = self.transforms(waveform1)
             waveform2 = self.transforms(waveform2)
         melspec1 = self.mel(waveform1)
+        melspec1 = torch.stack([melspec1, melspec1, melspec1], dim=0).squeeze()
         melspec2 = self.mel(waveform2)
+        melspec2 = torch.stack([melspec2, melspec2, melspec2], dim=0).squeeze()
         return melspec1, melspec2
 
 

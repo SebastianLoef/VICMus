@@ -1,13 +1,13 @@
 # VICReg
 vicreg:
   base_lr: 0.2
-  projector: 768-8196-8196-8196 # 768 for smoll
+  projector: 1000-1024 # 768 for smoll
   weight_decay: 0.000001
   sim_coeff: 25
   std_coeff: 25
   cov_coeff: 1
 
-  batch_size: 768
+  batch_size: 64
   model: small
   pretrained: True
 
@@ -22,14 +22,14 @@ evaluation:
 
 # training general
 general: 
-  epochs: 1000
-  num_workers: 6
+  epochs: 1
+  num_workers: 96
   train_dataset: msd
-  val_dataset: magnatagatune
+  val_dataset: msd
   preload_train_dataset: False
   preload_val_dataset: False
   accelerator: tpu
-  devices: 8
+  devices: 1
   precision: bf16-mixed
   check_val_every_n_epoch: 1
 
