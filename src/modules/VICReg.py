@@ -1,14 +1,17 @@
 from typing import Tuple
+from lightning.pytorch.utilities.types import TRAIN_DATALOADERS
+
 import numpy as np
 import torch
 from torch import Tensor
 import torch.nn.functional as F
 import lightning as L
 
-from utils import off_diagonal
+from utils import off_diagonal, get_dataset
 from optimizers import LARS, adjust_learning_rate, include_bias_and_norm
 from architectures import mlp
-
+from torch.utils.data import DataLoader
+from transforms import AudioSplit
 
 class VICReg(L.LightningModule):
     def __init__(self, args, backbone):
@@ -111,3 +114,25 @@ class VICReg(L.LightningModule):
             lars_adaptation_filter=include_bias_and_norm,
         )
         return optimizer
+    
+    def train_dataloader(self) -> TRAIN_DATALOADERS:
+        dataset = get_dataset(self.args.train_dataset)
+        return DataLoader(
+            dataset("train", transforms=AudioSplit()),
+            batch_size=self.args.batch_size,
+            shuffle=True,
+            num_workers=self.args.num_workers,
+            drop_last=True,
+            pin_memory=True,
+        )
+    
+    def val_dataloader(self) -> TRAIN_DATALOADERS:
+        dataset = get_dataset(self.args.val_dataset)
+        return DataLoader(
+            dataset("valid", transforms=AudioSplit()),
+            batch_size=self.args.batch_size,
+            shuffle=False,
+            num_workers=self.args.num_workers,
+            drop_last=True,
+            pin_memory=True,
+        )

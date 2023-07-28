@@ -45,7 +45,7 @@ def get_epoch_checkpoint_path(name: str, epoch: int = 0) -> str:
 
 
 def get_dataset(name: str):
-    if name == "magnatagatune":
+    if name == "mtat":
         print("Using MagnaTagATune dataset")
         return MagnaTagATune
     elif name == "gtzan":

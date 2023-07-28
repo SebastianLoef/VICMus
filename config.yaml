@@ -7,7 +7,7 @@ vicreg:
   std_coeff: 25
   cov_coeff: 1
 
-  batch_size: 64
+  batch_size: 128
   model: small
   pretrained: True
 
@@ -23,15 +23,15 @@ evaluation:
 # training general
 general: 
   epochs: 1
-  num_workers: 96
+  num_workers: 16
   train_dataset: msd
   val_dataset: msd
-  preload_train_dataset: False
-  preload_val_dataset: False
-  accelerator: tpu
-  devices: 1
-  precision: bf16-mixed
   check_val_every_n_epoch: 1
+
+  accelerator: tpu
+  devices: 8
+  precision: bf16-mixed
+  strategy: xla
 
   sample_rate: 22050
   hop_length: 128

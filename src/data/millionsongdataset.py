@@ -1,13 +1,13 @@
-import torchaudio
-from torch.utils.data import Dataset
-from torch import Tensor, FloatTensor
 import os
+import torchaudio
 import pandas as pd
-from typing import Tuple
+from torch.utils.data import Dataset
 from torchaudio.transforms import Resample
+from torch import Tensor, FloatTensor
+from typing import Tuple
 
 class MillionSongDataset(Dataset):
-    MULTI_LABEL = True
+    MULTILABEL = True
     NUM_LABELS = 50
     def __init__(self,
                  subset: str = 'train',
@@ -15,22 +15,24 @@ class MillionSongDataset(Dataset):
                  meta_path: str="data/processed/MSD/", 
                  sample_rate: int=22050,
                  transforms=None,
+                 **kwargs
                  ) -> None:
+        super().__init__()
         self.root = root
         self.meta_path = meta_path
         self.subset = subset
         self.sample_rate = sample_rate
         self.transforms = transforms
-        print(f"{self.meta_path} {self.subset}")
-        self._get_song_list()
+        #print(f"{self.meta_path} {self.subset}")
+        self.fl = self._get_song_list()
 
     def __getitem__(self, index) -> Tuple[Tensor, FloatTensor]:
-        audio_path = os.path.join(self.root, self.fl[index])
+        audio_path = os.path.join(self.root, self.fl.iloc[index][0])
         audio, sr = torchaudio.load(audio_path, format='mp3')
 
-        if sr != self.sample_rate:
-            transform = Resample(sr, self.sample_rate)
-            audio = transform(audio)
+        #if sr != self.sample_rate:
+        transform = Resample(sr, self.sample_rate)
+        audio = transform(audio)
 
         audio = audio.mean(dim=0, keepdim=True)
         if self.transforms:
@@ -50,25 +52,13 @@ class MillionSongDataset(Dataset):
                 .drop('_merge', axis=1)
                 .reset_index(drop=True))
 
-        self.fl = df[0].values
+        return df
     
     def __len__(self):
-        return len(self.fl)
-
-
-if __name__ == '__main__':
-    dataset = MillionSongDataset()
-    print(len(dataset))
-    print(dataset[0])
-    print(dataset[0][1].shape)
-    print(dataset[0][1])
-    print(dataset[0][1].dtype)
-    print(dataset[0][0].dtype)
-    print(dataset[0][0].shape)
-    print(dataset[0][0].max())
-    print(dataset[0][0].min())
-    print(dataset[0][0].mean())
-    print(dataset[0][0].std())
-    print(dataset[0][0].median())
-    print(dataset[0][0].var())
-    print(dataset[0][0].sum())
+        return  20000#len(self.fl)
+    
+if __name__ == "__main__":
+    train_dataset = MillionSongDataset(subset='train')
+    print(len(train_dataset))
+    print(train_dataset[55][0].shape)
+    print(train_dataset[97][1].shape)
