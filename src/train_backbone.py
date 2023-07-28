@@ -4,7 +4,6 @@ import yaml
 import lightning as L
 
 from utils import save_parameters
-from architectures import convnext
 from lightning.pytorch.callbacks import ModelCheckpoint
 #from lightning.pytorch.loggers import WandbLogger
 from modules.VICReg import VICReg
@@ -47,7 +46,10 @@ def main(args):
     ############################
     # model
     ############################
-    backbone = convnext(args.model, pretrained=args.pretrained)
+    #backbone = convnext(args.model, pretrained=args.pretrained)
+    # import resnet
+    from torchvision.models import resnet50, ResNet50_Weights
+    backbone = resnet50(pretrained=True)
     model = VICReg(args, backbone)
     ############################
     # Checkpointing
