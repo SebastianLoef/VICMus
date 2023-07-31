@@ -118,21 +118,23 @@ class VICReg(L.LightningModule):
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         dataset = get_dataset(self.args.train_dataset)
         return DataLoader(
-            dataset("train", transforms=AudioSplit()),
+            dataset("train", transforms=AudioSplit(self.args)),
             batch_size=self.args.batch_size,
             shuffle=True,
             num_workers=self.args.num_workers,
             drop_last=True,
             pin_memory=True,
+            prefetch_factor=self.args.prefetch_factor,
         )
     
     def val_dataloader(self) -> TRAIN_DATALOADERS:
         dataset = get_dataset(self.args.val_dataset)
         return DataLoader(
-            dataset("valid", transforms=AudioSplit()),
+            dataset("valid", transforms=AudioSplit(self.args)),
             batch_size=self.args.batch_size,
             shuffle=False,
             num_workers=self.args.num_workers,
             drop_last=True,
             pin_memory=True,
+            prefetch_factor=self.args.prefetch_factor,
         )
