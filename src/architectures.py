@@ -4,16 +4,11 @@ import torch
 import torch.nn as nn
 from torchvision.models import resnet50, ResNet50_Weights
 
-class Identity(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        return x
-
-def resnet(**kwargs):
-    model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2, **kwargs)
-    #model.fc = Identity() 
+def resnet(pretrained: bool,**kwargs):
+    weights = ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
+    print(f"Loading ResNet50 with weights: {weights}")
+    model = resnet50(weights=weights, **kwargs)
+    model.fc = nn.Identity() 
     return model
 
 def mlp(mlp_spec, norm: bool = True, bias: bool = True):

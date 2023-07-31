@@ -5,7 +5,7 @@ import lightning as L
 
 from utils import save_parameters
 from lightning.pytorch.callbacks import ModelCheckpoint
-#from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.loggers import WandbLogger
 from modules.VICReg import VICReg
 from utils import get_model_name, get_model_number
 from architectures import resnet
@@ -40,15 +40,15 @@ def main(args):
     ############################
     # Logging
     ############################
-    #wandb_logger = WandbLogger(project=args.loss, name=name, save_dir="data/logs")
-    #wandb_logger.experiment.config.update(args.__dict__, allow_val_change=True)
+    wandb_logger = WandbLogger(project=args.loss, name=name, save_dir="data/logs")
+    wandb_logger.experiment.config.update(args.__dict__, allow_val_change=True)
     if args.devices > 1:
         args.batch_size = int(args.batch_size / args.devices)
     ############################
     # model
     ############################
-    backbone = resnet()
-    model = VICReg(backbone, args)
+    backbone = resnet(args.pretrained)
+    model = VICReg(args, backbone)
     ############################
     # Checkpointing
     ############################
@@ -91,10 +91,9 @@ def main(args):
     ############################
     # Training
     ############################
-    compiled_model = model #torch.compile(model, backend='torchxla_trace_once')
     trainer = L.Trainer(
-        #callbacks=checkpoint_callbacks,
-        #logger=wandb_logger,
+        callbacks=checkpoint_callbacks,
+        logger=wandb_logger,
         max_epochs=args.epochs,
         accelerator=args.accelerator,
         devices=args.devices,
@@ -105,7 +104,7 @@ def main(args):
         strategy=args.strategy,
     )
     trainer.fit(
-        compiled_model,
+        model,
     )
 
 

@@ -55,7 +55,7 @@ class MillionSongDataset(Dataset):
         return df
     
     def __len__(self):
-        return  20000#len(self.fl)
+        return  len(self.fl)
     
 if __name__ == "__main__":
     train_dataset = MillionSongDataset(subset='train')
