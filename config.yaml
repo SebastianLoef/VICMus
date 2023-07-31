@@ -1,15 +1,14 @@
 # VICReg
 vicreg:
-  base_lr: 0.2
-  projector: 1000-1024 # 768 for smoll
+  base_lr: 0.8
+  projector: 2048-8196-8196-8196 # 768 for smoll
   weight_decay: 0.000001
   sim_coeff: 25
   std_coeff: 25
   cov_coeff: 1
 
-  batch_size: 128
-  model: small
-  pretrained: True
+  batch_size: 2048
+  pretrained: 0
 
 # Evaluation
 evaluation:
@@ -22,17 +21,26 @@ evaluation:
 
 # training general
 general: 
-  epochs: 1
+  epochs: 1000
   num_workers: 16
   train_dataset: msd
   val_dataset: msd
-  check_val_every_n_epoch: 1
+  prefetch_factor: 2
+  check_val_every_n_epoch: 20
 
+  # hardrware
   accelerator: tpu
   devices: 8
-  precision: bf16-mixed
+  precision: bf16
   strategy: xla
 
+  # Audio
   sample_rate: 22050
-  hop_length: 128
-  win_length: 250
+  n_samples: 65024
+
+  # Mel Spectrogram
+  n_fft: 1024
+  win_length: 1024
+  hop_length: 512
+  f_min: 20
+  f_max: 11000
