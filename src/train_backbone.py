@@ -14,16 +14,13 @@ from architectures import resnet
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="config.yaml")
-    parser.add_argument("--loss", type=str, default="vicreg")
-    parser.add_argument("--encoder_train_dataset", type=str, default="freemusicarchive")
-    parser.add_argument("--encoder_val_dataset", type=str, default="magnatagatune")
 
     args, _ = parser.parse_known_args()
     # add arguments from yaml file
     with open(args.config, "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    for k, v in config[args.loss].items():
+    for k, v in config["vicreg"].items():
         parser.add_argument(f"--{k}", type=type(v), default=v)
     for k, v in config["general"].items():
         parser.add_argument(f"--{k}", type=type(v), default=v)
@@ -53,26 +50,23 @@ def main(args):
     # Checkpointing
     ############################
     checkpoint_callbacks = []
-    if args.loss == "vicreg":
-        checkpoint_metrics = [
-            "val_loss",
-            "train_loss",
-            "train_invariance_loss",
-            "train_variance_loss",
-            "train_covariance_loss",
-            "val_invariance_loss",
-            "val_variance_loss",
-            "val_covariance_loss",
-        ]
-    else:
-        checkpoint_metrics = ["val_loss", "train_loss"]
+    checkpoint_metrics = [
+        "val_loss",
+        "train_loss",
+        "train_invariance_loss",
+        "train_variance_loss",
+        "train_covariance_loss",
+        "val_invariance_loss",
+        "val_variance_loss",
+        "val_covariance_loss",
+    ]
 
     for metric in checkpoint_metrics:
         checkpoint_callbacks.append(
             ModelCheckpoint(
                 monitor=metric,
                 dirpath=f"data/models/{name}",
-                filename=f"{args.loss}-best-{metric}",
+                filename=f"vicreg-best-{metric}",
                 save_top_k=1,
                 mode="min",
                 save_weights_only=True,
@@ -81,7 +75,7 @@ def main(args):
     checkpoint_callbacks.append(
         ModelCheckpoint(
             dirpath=f"data/models/{name}",
-            filename=f"{args.loss}" + "-{epoch:02d}",
+            filename="vicreg-{epoch:02d}",
             save_top_k=-1,
             every_n_epochs=100,
             save_weights_only=True,
