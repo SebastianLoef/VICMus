@@ -92,7 +92,7 @@ class VICReg(L.LightningModule):
         c = np.mean([x["covariance"].cpu().detach().numpy() for x in outputs])
         reg = None  # 😎
         loss = np.mean([x["loss"].cpu().detach().numpy() for x in outputs])
-        self.log(f"{name}_loss", loss)
+        self.log(f"{name}_loss", loss, sync_dist=True)
         self.log(f"{name}_variance_loss", v, sync_dist=True)
         self.log(f"{name}_invariance_loss", i, sync_dist=True)
         self.log(f"{name}_covariance_loss", c, sync_dist=True)
