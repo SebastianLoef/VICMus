@@ -32,12 +32,13 @@ def get_arguments():
 def main(args):
     name = get_model_name() + f"-{get_model_number()}"
     save_parameters(args, name)
-    
-    
+
     ############################
     # Logging
     ############################
-    wandb_logger = WandbLogger(project="ICASSP2024", entity="sebastianl",name=name, save_dir="data/logs")
+    wandb_logger = WandbLogger(
+        project="ICASSP2024", entity="sebastianl", name=name, save_dir="data/logs"
+    )
     wandb_logger.experiment.config.update(args.__dict__, allow_val_change=True)
     if args.devices > 1:
         args.batch_size = int(args.batch_size / args.devices)

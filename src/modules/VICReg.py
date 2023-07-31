@@ -13,6 +13,7 @@ from architectures import mlp
 from torch.utils.data import DataLoader
 from transforms import AudioSplit
 
+
 class VICReg(L.LightningModule):
     def __init__(self, args, backbone):
         super().__init__()
@@ -114,7 +115,7 @@ class VICReg(L.LightningModule):
             lars_adaptation_filter=include_bias_and_norm,
         )
         return optimizer
-    
+
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         dataset = get_dataset(self.args.train_dataset)
         return DataLoader(
@@ -126,7 +127,7 @@ class VICReg(L.LightningModule):
             pin_memory=True,
             prefetch_factor=self.args.prefetch_factor,
         )
-    
+
     def val_dataloader(self) -> TRAIN_DATALOADERS:
         dataset = get_dataset(self.args.val_dataset)
         return DataLoader(

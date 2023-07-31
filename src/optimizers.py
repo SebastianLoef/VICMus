@@ -4,7 +4,8 @@ from torch import optim
 
 
 class LARS(optim.Optimizer):
-    """ Lars optimizer, code taken from VICReg repo"""
+    """Lars optimizer, code taken from VICReg repo"""
+
     def __init__(
         self,
         params,
@@ -64,6 +65,7 @@ class LARS(optim.Optimizer):
 
                 p.add_(mu, alpha=-g["lr"])
         return loss
+
 
 def include_bias_and_norm(p):
     return p.ndim == 1

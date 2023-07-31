@@ -4,12 +4,14 @@ import torch
 import torch.nn as nn
 from torchvision.models import resnet50, ResNet50_Weights
 
-def resnet(pretrained: bool,**kwargs):
+
+def resnet(pretrained: bool, **kwargs):
     weights = ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
     print(f"Loading ResNet50 with weights: {weights}")
     model = resnet50(weights=weights, **kwargs)
-    model.fc = nn.Identity() 
+    model.fc = nn.Identity()
     return model
+
 
 def mlp(mlp_spec, norm: bool = True, bias: bool = True):
     layers = []
