@@ -14,14 +14,14 @@ class Classifier(L.LightningModule):
                 multilabel: bool,
                 num_features: int,
                 backbone: nn.Module,
-                embedding: int = 512
                 ):
         super().__init__()
         self.args = args
         self.multilabel = multilabel
         self.num_features = num_features
-        self.embedding = embedding
+        self.embedding = 2048 
         self.backbone = backbone.eval()
+        
         if bool(self.args.linear):
             self.mlp = nn.Linear(self.embedding, self.num_features)
         else:
@@ -50,17 +50,24 @@ class Classifier(L.LightningModule):
             x = torch.mean(x, dim=1, keepdim=True)
         x = self.mlp(x)
         return x
-    
+
+    def _interal_forward(self, x: torch.Tensor) -> torch.Tensor:
+        with torch.no_grad():
+            x = self.backbone(x)
+        if len(x.shape) == 3:
+            x = torch.mean(x, dim=1, keepdim=True)
+        return self.mlp(x)
+
     def training_step(self, batch, batch_idx):
         x, y = batch
-        x = self.forward(x)
+        x = self._interal_forward(x)
         loss = self.loss(x, y)
         self.log("train_loss", loss)
         return loss    
 
     def evaluation_step(self, x, y) -> dict:
+        x = self._interal_forward(x)
         loss = self.loss(x, y).cpu().numpy()
-
         if self.multilabel:
             predictions = torch.sigmoid(x).cpu().numpy()
         else:
@@ -70,18 +77,11 @@ class Classifier(L.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        x = self.forward(x)
         self.val_outputs.append(self.evaluation_step(x, y))
         return x
     
     def test_step(self, batch, batch_idx):
         x, y = batch
-        if len(x.shape) == 4:
-            x = x.squeeze(0)
-            x = self.forward(x)
-            x = torch.mean(x, dim=0, keepdim=True)
-        else:
-            x = self.forward(x)
         self.test_outputs.append(self.evaluation_step(x, y))
         return x
     
