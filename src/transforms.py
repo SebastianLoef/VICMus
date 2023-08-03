@@ -52,7 +52,7 @@ class MelSpectrogram(nn.Module):
         )
     def forward(self, waveform: torch.Tensor) -> torch.Tensor:
         melspec = self.mel(waveform)
-        melspec = torch.stack([melspec, melspec, melspec], dim=0).squeeze()
+        melspec = torch.stack([melspec, melspec, melspec], dim=-3).squeeze()
         return melspec
 
 class AudioSplit(nn.Module):
@@ -63,7 +63,7 @@ class AudioSplit(nn.Module):
         super().__init__()
         self.split = RandomResizedCrop(n_samples=args.n_samples)
         self.transforms = get_transforms(args)
-        self.mel = Melspectrogram(args)
+        self.mel = MelSpectrogram(args)
 
     @torch.no_grad()
     def forward(self, waveform: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:

@@ -51,22 +51,24 @@ class Classifier(L.LightningModule):
         x = self.mlp(x)
         return x
 
-    def _interal_forward(self, x: torch.Tensor) -> torch.Tensor:
+    def _interal_forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+        if len(x.shape) == 5:
+            x = x.squeeze(0)
+            # repeat y to match x first dimenion
+            y = y.repeat(x.shape[0], 1)
         with torch.no_grad():
             x = self.backbone(x)
-        if len(x.shape) == 3:
-            x = torch.mean(x, dim=1, keepdim=True)
-        return self.mlp(x)
+        return self.mlp(x), y
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        x = self._interal_forward(x)
+        x, y = self._interal_forward(x, y)
         loss = self.loss(x, y)
         self.log("train_loss", loss)
         return loss    
 
     def evaluation_step(self, x, y) -> dict:
-        x = self._interal_forward(x)
+        x, y = self._interal_forward(x, y)
         loss = self.loss(x, y).cpu().numpy()
         if self.multilabel:
             predictions = torch.sigmoid(x).cpu().numpy()
