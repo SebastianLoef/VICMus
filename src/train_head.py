@@ -56,11 +56,12 @@ def main(args):
     ###########################
     # transforms
     ############################
-    transforms = Compose([
-
-        RandomResizedCrop(n_samples=backbone_args.n_samples),
-        MelSpectrogram(backbone_args),
-    ])
+    transforms = Compose(
+        [
+            RandomResizedCrop(n_samples=backbone_args.n_samples),
+            MelSpectrogram(backbone_args),
+        ]
+    )
     ############################
     # dataset
     ############################
@@ -105,19 +106,19 @@ def main(args):
     ############################
     print(backbone_path)
     backbone_module = VICReg.load_from_checkpoint(
-        backbone_path,
-        args=backbone_args,
-        backbone=resnet())
-    backbone = backbone_module.backbone.cpu()
-    model = Classifier(
-        args, MULTILABELS, NUM_LABELS, backbone
+        backbone_path, args=backbone_args, backbone=resnet()
     )
+    backbone = backbone_module.backbone.cpu()
+    model = Classifier(args, MULTILABELS, NUM_LABELS, backbone)
     #
     ############################
-    # logger 
+    # logger
     ############################
     wandb_logger = WandbLogger(
-        project="ICASSP2024", name=name_linear, entity="sebastianl", save_dir="data/logs"
+        project="ICASSP2024",
+        name=name_linear,
+        entity="sebastianl",
+        save_dir="data/logs",
     )
     for k, v in args.__dict__.items():
         wandb_logger.experiment.config[k] = v

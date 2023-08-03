@@ -11,18 +11,18 @@ class TestDataset(Dataset):
         self.dataset = dataset
         self.n_samples = args.n_samples
         self.melspec = MelSpectrogram(args)
-    
+
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         audio, label = self.dataset[index]
         batch = torch.split(audio, self.n_samples, dim=1)
         batch = torch.cat(batch[:-1], dim=0)
         batch = batch.unsqueeze(dim=1)
-        print(batch.shape)
         batch = self.melspec(batch)
         return batch, label
 
     def __len__(self) -> int:
         return len(self.dataset)
+
 
 if __name__ == "__main__":
     from magnatagatune import MagnaTagATune
