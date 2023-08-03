@@ -9,19 +9,20 @@ import lightning as L
 
 
 class Classifier(L.LightningModule):
-    def __init__(self, 
-                args,
-                multilabel: bool,
-                num_features: int,
-                backbone: nn.Module,
-                ):
+    def __init__(
+        self,
+        args,
+        multilabel: bool,
+        num_features: int,
+        backbone: nn.Module,
+    ):
         super().__init__()
         self.args = args
         self.multilabel = multilabel
         self.num_features = num_features
-        self.embedding = 2048 
+        self.embedding = 2048
         self.backbone = backbone.eval()
-        
+
         if bool(self.args.linear):
             self.mlp = nn.Linear(self.embedding, self.num_features)
         else:
@@ -29,8 +30,8 @@ class Classifier(L.LightningModule):
                 nn.Linear(self.embedding, self.embedding),
                 nn.ReLU(),
                 nn.Linear(self.embedding, self.num_features),
-                )
-        
+            )
+
         print(self.mlp)
 
         if self.multilabel:
@@ -41,7 +42,6 @@ class Classifier(L.LightningModule):
         self.save_hyperparameters()
         self.val_outputs = []
         self.test_outputs = []
-
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
@@ -65,7 +65,7 @@ class Classifier(L.LightningModule):
         x, y = self._interal_forward(x, y)
         loss = self.loss(x, y)
         self.log("train_loss", loss)
-        return loss    
+        return loss
 
     def evaluation_step(self, x, y) -> dict:
         x, y = self._interal_forward(x, y)
@@ -76,31 +76,32 @@ class Classifier(L.LightningModule):
             predictions = torch.argmax(x, dim=1).cpu().numpy()
         labels = y.cpu().numpy()
         return {"loss": loss, "predictions": predictions, "labels": labels}
-    
+
     def validation_step(self, batch, batch_idx):
         x, y = batch
         self.val_outputs.append(self.evaluation_step(x, y))
         return x
-    
+
     def test_step(self, batch, batch_idx):
         x, y = batch
         self.test_outputs.append(self.evaluation_step(x, y))
         return x
-    
-    def __on_epoch_end(self, outputs: dict, key: str): 
+
+    def __on_epoch_end(self, outputs: dict, key: str):
         predictions = np.concatenate([x["predictions"] for x in outputs])
         labels = np.concatenate([x["labels"] for x in outputs])
         loss = np.mean([x["loss"] for x in outputs])
         self.log(f"{key}_loss", loss)
         if self.multilabel:
-            roc_auc = metrics.roc_auc_score(labels, predictions, average='macro')
+            roc_auc = metrics.roc_auc_score(labels, predictions, average="macro")
             self.log(f"{key}_roc_auc", roc_auc)
-            average_precision = metrics.average_precision_score(labels, predictions, average='macro')
+            average_precision = metrics.average_precision_score(
+                labels, predictions, average="macro"
+            )
             self.log(f"{key}_pr_auc", average_precision)
-        
+
         else:
             self.log(f"{key}_acc", metrics.accuracy_score(labels, predictions))
-
 
     def on_validation_epoch_end(self) -> None:
         self.__on_epoch_end(self.val_outputs, "val")
@@ -112,9 +113,8 @@ class Classifier(L.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
-            self.parameters(), 
-            lr=self.args.lr,
-            weight_decay=self.args.weight_decay)
+            self.parameters(), lr=self.args.lr, weight_decay=self.args.weight_decay
+        )
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
             mode="min",
