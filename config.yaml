@@ -25,6 +25,7 @@ general:
   num_workers: 16
   train_dataset: msd
   val_dataset: msd
+  test_dataset: mtat
   prefetch_factor: 1
   check_val_every_n_epoch: 20
 
