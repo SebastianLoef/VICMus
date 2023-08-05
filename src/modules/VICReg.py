@@ -76,17 +76,6 @@ class VICReg(L.LightningModule):
         )
         self.log("lr", lr, sync_dist=True)
 
-    def validation_step(self, batch, batch_idx):
-        loss, vic = self.vicreg_loss(batch)
-        losses = {
-            "loss": loss,
-            "invariance": vic[0],
-            "variance": vic[1],
-            "covariance": vic[2],
-        }
-        self.val_outputs.append(losses)
-        return losses
-
     def _on_epoch_end(self, outputs, name):
         v = np.mean([x["variance"].cpu().detach().numpy() for x in outputs])
         i = np.mean([x["invariance"].cpu().detach().numpy() for x in outputs])
@@ -97,10 +86,6 @@ class VICReg(L.LightningModule):
         self.log(f"{name}_variance_loss", v, sync_dist=True)
         self.log(f"{name}_invariance_loss", i, sync_dist=True)
         self.log(f"{name}_covariance_loss", c, sync_dist=True)
-
-    def on_validation_epoch_end(self):
-        self._on_epoch_end(self.val_outputs, "val")
-        self.val_outputs = []
 
     def on_train_epoch_end(self) -> None:
         self._on_epoch_end(self.train_outputs, "train")
@@ -122,18 +107,6 @@ class VICReg(L.LightningModule):
             dataset("train", transforms=AudioSplit(self.args)),
             batch_size=self.args.batch_size,
             shuffle=True,
-            num_workers=self.args.num_workers,
-            drop_last=True,
-            pin_memory=True,
-            prefetch_factor=self.args.prefetch_factor,
-        )
-
-    def val_dataloader(self) -> TRAIN_DATALOADERS:
-        dataset = get_dataset(self.args.val_dataset)
-        return DataLoader(
-            dataset("valid", transforms=AudioSplit(self.args)),
-            batch_size=self.args.batch_size,
-            shuffle=False,
             num_workers=self.args.num_workers,
             drop_last=True,
             pin_memory=True,

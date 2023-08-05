@@ -47,55 +47,25 @@ def main(args):
     ############################
     backbone = resnet(args.pretrained)
     model = VICReg(args, backbone)
-    ############################
-    # Checkpointing
-    ############################
-    checkpoint_callbacks = []
-    checkpoint_metrics = [
-        "val_loss",
-        "train_loss",
-        "train_invariance_loss",
-        "train_variance_loss",
-        "train_covariance_loss",
-        "val_invariance_loss",
-        "val_variance_loss",
-        "val_covariance_loss",
-    ]
-
-    for metric in checkpoint_metrics:
-        checkpoint_callbacks.append(
-            ModelCheckpoint(
-                monitor=metric,
-                dirpath=f"data/models/{name}",
-                filename=f"vicreg-best-{metric}",
-                save_top_k=1,
-                mode="min",
-                save_weights_only=True,
-            )
-        )
-    checkpoint_callbacks.append(
-        ModelCheckpoint(
+    checkpoint = ModelCheckpoint(
             dirpath=f"data/models/{name}",
             filename="vicreg-{epoch:02d}",
             save_top_k=-1,
-            every_n_epochs=100,
+            every_n_epochs=50,
             save_weights_only=True,
         )
-    )
-
     ############################
     # Training
     ############################
     trainer = L.Trainer(
-        callbacks=checkpoint_callbacks,
+        callbacks=[checkpoint],
         logger=wandb_logger,
         max_epochs=args.epochs,
         accelerator=args.accelerator,
         devices=args.devices,
         precision=args.precision,
         num_sanity_val_steps=0,
-        log_every_n_steps=10,
-        check_val_every_n_epoch=args.check_val_every_n_epoch,
+        log_every_n_steps=3,
         strategy=args.strategy,
     )
     trainer.fit(
