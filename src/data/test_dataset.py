@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
-from transforms import MelSpectrogram
+from transforms import TripletMelSpectrogram
 from typing import Tuple
 
 
@@ -10,7 +10,7 @@ class TestDataset(Dataset):
         super().__init__()
         self.dataset = dataset
         self.n_samples = args.n_samples
-        self.melspec = MelSpectrogram(args)
+        self.melspec = TripletMelSpectrogram(args)
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         audio, label = self.dataset[index]

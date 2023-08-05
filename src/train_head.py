@@ -7,7 +7,7 @@ from lightning.pytorch.loggers import WandbLogger
 from torch.utils.data import DataLoader
 from torchaudio_augmentations import RandomResizedCrop
 from torchvision.transforms import Compose
-from transforms import MelSpectrogram
+from transforms import TripletMelSpectrogram
 from architectures import resnet
 from modules.Classifier import Classifier
 from modules.VICReg import VICReg
@@ -59,7 +59,7 @@ def main(args):
     transforms = Compose(
         [
             RandomResizedCrop(n_samples=backbone_args.n_samples),
-            MelSpectrogram(backbone_args),
+            TripletMelSpectrogram(backbone_args),
         ]
     )
     ############################

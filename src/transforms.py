@@ -3,6 +3,7 @@ from typing import Any, Tuple, Union
 import torch
 import torch.nn as nn
 import torchaudio.transforms as transforms
+from torchvision.transforms import Resize
 from torchaudio_augmentations import (
     Compose,
     Delay,
@@ -55,6 +56,28 @@ class MelSpectrogram(nn.Module):
         melspec = torch.stack([melspec, melspec, melspec], dim=-3).squeeze()
         return melspec
 
+
+class TripletMelSpectrogram(nn.Module):
+    def __init__(
+        self,
+        args,
+    ):
+        super().__init__()
+        self.mel1 =  transforms.MelSpectrogram(
+            n_fft=512)
+        self.mel2 =  transforms.MelSpectrogram(
+            n_fft=1024)
+        self.mel3 =  transforms.MelSpectrogram(
+            n_fft=2048)
+        self.resize = Resize((128, 128))
+
+    @torch.no_grad()
+    def forward(self, waveform: torch.Tensor) -> torch.Tensor:
+        melspec1 = self.resize(self.mel1(waveform))
+        melspec2 = self.resize(self.mel2(waveform))
+        melspec3 = self.resize(self.mel3(waveform))
+        return torch.stack([melspec1, melspec2, melspec3], dim=-3).squeeze()  
+    
 class AudioSplit(nn.Module):
     def __init__(
         self,
@@ -63,7 +86,7 @@ class AudioSplit(nn.Module):
         super().__init__()
         self.split = RandomResizedCrop(n_samples=args.n_samples)
         self.transforms = get_transforms(args)
-        self.mel = MelSpectrogram(args)
+        self.mel = TripletMelSpectrogram(args)
 
     @torch.no_grad()
     def forward(self, waveform: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
