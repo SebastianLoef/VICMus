@@ -8,6 +8,7 @@ from types import SimpleNamespace
 from data.gtzan import GTZAN
 from data.magnatagatune import MagnaTagATune
 from data.millionsongdataset import MillionSongDataset
+from data.freemusicarchive import FreeMusicArchive
 
 
 def off_diagonal(x):
@@ -48,6 +49,9 @@ def get_dataset(name: str):
     if name == "mtat":
         print("Using MagnaTagATune dataset")
         return MagnaTagATune
+    elif name == "fma":
+        print("Using FreeMusicArchive dataset")
+        return FreeMusicArchive
     elif name == "gtzan":
         print("Using GTZAN dataset")
         return GTZAN

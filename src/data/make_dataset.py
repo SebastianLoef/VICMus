@@ -5,7 +5,6 @@ from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 import os
 import compile_dataset
-import compile_msd
 
 
 @click.command()
@@ -17,7 +16,6 @@ def main(input_filepath, output_filepath):
     """
     os.system("bash src/data/download_data.sh") 
     compile_dataset.main()
-    compile_msd.main()
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
 
