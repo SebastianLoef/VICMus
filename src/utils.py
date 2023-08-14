@@ -9,6 +9,7 @@ from tqdm import tqdm
 from data.gtzan import GTZAN
 from data.magnatagatune import MagnaTagATune
 from data.millionsongdataset import MillionSongDataset
+from data.freemusicarchive import FreeMusicArchive
 
 
 def generate_encodings(args, module, dataset, subset, normalize=False):
@@ -79,6 +80,9 @@ def get_dataset(name: str):
     if name == "mtat":
         print("Using MagnaTagATune dataset")
         return MagnaTagATune
+    elif name == "fma":
+        print("Using FreeMusicArchive dataset")
+        return FreeMusicArchive
     elif name == "gtzan":
         print("Using GTZAN dataset")
         return GTZAN
