@@ -42,3 +42,4 @@ general:
   hop_length: 512
   f_min: 20
   f_max: 11000
+  normalized: 1
