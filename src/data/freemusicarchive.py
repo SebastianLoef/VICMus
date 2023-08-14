@@ -13,10 +13,10 @@ class FreeMusicArchive(Dataset):
     NUM_LABELS = None
     MULTILABEL = None
     def __init__(self, 
+                 subset=None,
                  root: str = "data/processed/FMA/fma_medium/", 
                  sample_rate: int=22050,
                  transforms=None,
-                 subset=None,
                  **kwargs) -> None:
         super().__init__()
         self.root = root
@@ -32,7 +32,7 @@ class FreeMusicArchive(Dataset):
         self.df["mp3_path"] = self.df.mp3_path.apply(lambda x: os.path.join(self.root, x))
 
     def __getitem__(self, index) -> Tuple[Tensor, int]:
-        audio_path, _ = self.df.iloc[index]
+        audio_path, _ = self.df.iloc[index, 1:]
         audio, sr = torchaudio.load(audio_path, format='mp3')
         if sr != self.sample_rate:
             transform = Resample(sr, self.sample_rate)
@@ -45,6 +45,7 @@ class FreeMusicArchive(Dataset):
         return audio, Tensor(1)
 
     def _get_song_list(self):
+        print(os.path.join(self.root, "metadata.csv"))
         df = pd.read_csv(os.path.join(self.root, "metadata.csv"), sep=',')
         df.drop(index=self.broken_FMA, inplace=True)
         return df
