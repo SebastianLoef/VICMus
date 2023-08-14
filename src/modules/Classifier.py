@@ -14,14 +14,12 @@ class Classifier(L.LightningModule):
         args,
         multilabel: bool,
         num_features: int,
-        backbone: nn.Module,
     ):
         super().__init__()
         self.args = args
         self.multilabel = multilabel
         self.num_features = num_features
         self.embedding = 2048
-        self.backbone = backbone.eval()
 
         if bool(self.args.linear):
             self.mlp = nn.Linear(self.embedding, self.num_features)
@@ -31,8 +29,6 @@ class Classifier(L.LightningModule):
                 nn.ReLU(),
                 nn.Linear(self.embedding, self.num_features),
             )
-
-        print(self.mlp)
 
         if self.multilabel:
             self.loss = nn.BCEWithLogitsLoss()
@@ -44,20 +40,10 @@ class Classifier(L.LightningModule):
         self.test_outputs = []
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        with torch.no_grad():
-            x = self.backbone(x)
-        if len(x.shape) == 3:
-            x = torch.mean(x, dim=1, keepdim=True)
         x = self.mlp(x)
         return x
 
     def _interal_forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-        if len(x.shape) == 5:
-            x = x.squeeze(0)
-            # repeat y to match x first dimenion
-            y = y.repeat(x.shape[0], 1)
-        with torch.no_grad():
-            x = self.backbone(x)
         return self.mlp(x), y
 
     def training_step(self, batch, batch_idx):
@@ -112,20 +98,15 @@ class Classifier(L.LightningModule):
         self.test_outputs = []
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(
-            self.parameters(), lr=self.args.lr, weight_decay=self.args.weight_decay
+        optimizer = torch.optim.SGD(
+            self.parameters(),
+            lr=self.args.lr,
+            weight_decay=self.args.weight_decay,
+            momentum=self.args.momentum,
         )
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer,
-            mode="min",
-            factor=0.1,
-            patience=5,
-            threshold=0.0001,
-            threshold_mode="rel",
-            cooldown=0,
-            min_lr=0,
-            eps=1e-08,
-            verbose=False,
+            T_max=self.args.epochs,
         )
         return {
             "optimizer": optimizer,

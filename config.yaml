@@ -1,6 +1,6 @@
 # VICReg
 vicreg:
-  base_lr: 0.8
+  base_lr: 0.4
   projector: 2048-8196-8196-8196 # 768 for smoll
   weight_decay: 0.000001
   sim_coeff: 25
@@ -12,20 +12,17 @@ vicreg:
 
 # Evaluation
 evaluation:
-  batch_size: 256
-  lr: 0.001
-  weight_decay : 0.000001
+  batch_size: 50
+  lr: 0.32
+  weight_decay : 0.000015
+  momentum: 0.53
   linear: 1
-  percentage: 1.0
-  seed: 42
 
 # training general
 general: 
-  epochs: 1000
+  epochs: 200
   num_workers: 16
-  train_dataset: msd
-  val_dataset: msd
-  test_dataset: mtat
+  dataset: mtat
   prefetch_factor: 1
   check_val_every_n_epoch: 20
 

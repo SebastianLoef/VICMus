@@ -34,6 +34,8 @@ class MagnaTagATune(Dataset):
         self.fl = self.fl.reset_index(drop=True)
 
     def __getitem__(self, index) -> Tuple[Tensor, FloatTensor]:
+        if index >= len(self):
+            raise IndexError
         audio, sr, binary_label = self.get_audio(index)
         binary_label = FloatTensor(binary_label)
 

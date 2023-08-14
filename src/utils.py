@@ -4,10 +4,41 @@ import glob
 import json
 import names
 from types import SimpleNamespace
-
+import numpy as np
+from tqdm import tqdm
 from data.gtzan import GTZAN
 from data.magnatagatune import MagnaTagATune
 from data.millionsongdataset import MillionSongDataset
+
+
+def generate_encodings(args, module, dataset, subset, normalize=False):
+    path = f"data/models/{args.name}/{args.dataset}"
+    enc_path = os.path.join(path, f"{subset}_encodings.npy")
+    label_path = os.path.join(path, f"{subset}_labels.npy")
+    if os.path.exists(enc_path) and os.path.exists(label_path):
+        print("Loading encodings from file")
+        encodings = np.load(enc_path)
+        labels = np.load(label_path)
+        return encodings, labels
+    print("Generating encodings")
+    encodings = []
+    labels = []
+    module.eval().to("cuda")
+    for x, y in tqdm(dataset):
+        x = x.unsqueeze(0).to("cuda")
+        y = y.unsqueeze(0)
+        encoding = module(x)
+        encodings.append(encoding.detach().cpu().numpy())
+        labels.append(y.numpy())
+    encodings = np.concatenate(encodings, axis=0)
+    labels = np.concatenate(labels, axis=0)
+    if normalize:
+        encodings = encodings / np.linalg.norm(encodings, axis=1, keepdims=True)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    np.save(enc_path, encodings)
+    np.save(label_path, labels)
+    return encodings, labels
 
 
 def off_diagonal(x):

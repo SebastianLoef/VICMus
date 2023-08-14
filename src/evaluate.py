@@ -1,5 +1,4 @@
 import argparse
-
 import yaml
 import lightning as L
 from transforms import MelSpectrogram
@@ -13,40 +12,27 @@ from utils import (
     load_parameters,
 )
 
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression, LinearRegression, SGDRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.multioutput import ClassifierChain
 from sklearn import metrics
 import numpy as np
-from tqdm import tqdm
-
-def generate_encodings(args, module, dataset, normalize=True):
-    encodings = []
-    labels = []
-    for x, y in tqdm(dataset):
-        x = x.unsqueeze(0).to("cuda")
-        y = y.unsqueeze(0)
-        encoding = module(x)
-        encodings.append(encoding.detach().cpu().numpy())
-        labels.append(y.numpy())
-    encodings = np.concatenate(encodings, axis=0)
-    labels = np.concatenate(labels, axis=0)
-    if normalize:
-        encodings = encodings / np.linalg.norm(encodings, axis=1, keepdims=True)
-    return encodings, labels
+from utils import generate_encodings
 
 def fit_model(args, module, train_dataset):
     # fit linear model using scikit
-    print("Generate training encodings")
-    encodings, labels = generate_encodings(args, module, train_dataset)
+    encodings, labels = generate_encodings(args, module, train_dataset, "train")
     print(encodings.shape, labels.shape)
-    model = LinearRegression()
+    model = OneVsRestClassifier(SGDRegressor())
     print("Fit model")
     model.fit(encodings, labels)
     return model
 
-def evaluate_model(args, module, model, dataset):
-    encodings, labels = generate_encodings(args, module, dataset)
+def evaluate_model(args, module, model, dataset, subset):
+    encodings, labels = generate_encodings(args, module, dataset, subset)
     preds = model.predict(encodings)
-    print(preds.shape, labels.shape)
+    print(preds.shape, labels.shape, )
     return preds, labels
 
 def print_results(preds, labels):
@@ -59,10 +45,10 @@ def run(args, module, train_dataset, val_dataset, test_dataset):
     print("Fit model")
     model = fit_model(args, module, train_dataset)
     print("Evaluate model on validation set")
-    preds, labels = evaluate_model(args, module, model, val_dataset)
+    preds, labels = evaluate_model(args, module, model, val_dataset, "val")
     print_results(preds, labels)
     print("Evaluate model on test set")
-    preds, labels = evaluate_model(args, module, model, test_dataset)
+    preds, labels = evaluate_model(args, module, model, test_dataset, "test")
     print_results(preds, labels)
 
 def get_arguments():
