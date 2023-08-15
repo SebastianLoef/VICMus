@@ -49,9 +49,18 @@ class MelSpectrogram(nn.Module):
             f_min=args.f_min,
             f_max=args.f_max,
             sample_rate=args.sample_rate,
+            norm='slaney'
         )
+        self.normalize = args.normalize
+
     def forward(self, waveform: torch.Tensor) -> torch.Tensor:
+        # check if waveform contains non zero values
+
         melspec = self.mel(waveform)
+        if self.normalize:
+            melspec = torch.log1p(melspec + 1e-5)
+            melspec -= melspec.min()
+            melspec = (melspec) / (melspec.max() + 1e-8) * 2 - 1
         melspec = torch.stack([melspec, melspec, melspec], dim=-3).squeeze()
         return melspec
 
