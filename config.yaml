@@ -20,9 +20,9 @@ evaluation:
 
 # training general
 general: 
-  epochs: 200
+  epochs: 4000
   num_workers: 16
-  dataset: mtat
+  dataset: fma
   prefetch_factor: 1
   check_val_every_n_epoch: 20
 
@@ -42,4 +42,4 @@ general:
   hop_length: 512
   f_min: 20
   f_max: 11000
-  normalized: 1
+  normalize: 1

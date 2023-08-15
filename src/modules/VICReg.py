@@ -36,6 +36,7 @@ class VICReg(L.LightningModule):
     def vicreg_loss(self, batch):
         (x, y), _ = batch
         x, y = self.internal_forward(x, y)
+
         repr_loss = F.mse_loss(x, y)
         x = x - x.mean(dim=0)
         y = y - y.mean(dim=0)
@@ -102,7 +103,7 @@ class VICReg(L.LightningModule):
         return optimizer
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        dataset = get_dataset(self.args.train_dataset)
+        dataset = get_dataset(self.args.dataset)
         return DataLoader(
             dataset("train", transforms=AudioSplit(self.args)),
             batch_size=self.args.batch_size,
