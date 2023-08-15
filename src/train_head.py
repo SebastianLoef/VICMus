@@ -5,18 +5,22 @@ import lightning as L
 from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.loggers import WandbLogger
 from torch.utils.data import DataLoader
+from torchaudio_augmentations import RandomResizedCrop
+from torchvision.transforms import Compose
+from transforms import MelSpectrogram
 from architectures import resnet
 from modules.Classifier import Classifier
 from modules.VICReg import VICReg
 
 from utils import (
     get_best_metric_checkpoint_path,
+    get_dataset,
     get_epoch_checkpoint_path,
     get_model_number,
     load_parameters,
 )
 
-from data.encoded_dataset import EncodedDataset
+from data.test_dataset import TestDataset
 
 
 def get_arguments():
@@ -49,14 +53,23 @@ def main(args):
 
     name_linear = args.name + "-linear" + f"-{get_model_number()}-{metric}"
     backbone_args = load_parameters(args.name)
+    ###########################
+    # transforms
+    ############################
+    transforms = Compose(
+        [
+            RandomResizedCrop(n_samples=backbone_args.n_samples),
+            MelSpectrogram(backbone_args),
+        ]
+    )
     ############################
     # dataset
-    backbone_module = VICReg.load_from_checkpoint(
-        backbone_path, args=backbone_args, backbone=resnet()
-    )
-    train_dataset = EncodedDataset(backbone_module, args, "train")
-    val_dataset = EncodedDataset(backbone_module, args, "valid")
-    test_dataset = EncodedDataset(backbone_module, args, "test")
+    ############################
+    dataset = get_dataset(args.dataset)
+    train_dataset = dataset(subset="train", transforms=transforms)
+    val_dataset = dataset(subset="valid", transforms=transforms)
+    test_dataset = dataset(subset="test", transforms=transforms)
+    test_dataset = TestDataset(args, test_dataset)
 
     train_dataloader = DataLoader(
         train_dataset,
@@ -73,11 +86,7 @@ def main(args):
         pin_memory=True,
     )
     test_dataloader = DataLoader(
-        test_dataset,
-        batch_size=args.batch_size,
-        shuffle=False,
-        num_workers=0,
-        pin_memory=True,
+        test_dataset, batch_size=1, shuffle=False, num_workers=0, pin_memory=True
     )
 
     MULTILABELS = train_dataset.MULTILABEL
@@ -85,8 +94,12 @@ def main(args):
     ############################
     # model
     ############################
-
-    model = Classifier(args, MULTILABELS, NUM_LABELS)
+    print(backbone_path)
+    backbone_module = VICReg.load_from_checkpoint(
+        backbone_path, args=backbone_args, backbone=resnet()
+    )
+    backbone = backbone_module.backbone.cpu()
+    model = Classifier(args, MULTILABELS, NUM_LABELS, backbone)
     #
     ############################
     # logger
@@ -96,7 +109,6 @@ def main(args):
         name=name_linear,
         entity="sebastianl",
         save_dir="data/logs",
-        config=args,
         tags=["downstream"],
     )
     for k, v in args.__dict__.items():

@@ -14,12 +14,14 @@ class Classifier(L.LightningModule):
         args,
         multilabel: bool,
         num_features: int,
+        backbone: nn.Module,
     ):
         super().__init__()
         self.args = args
         self.multilabel = multilabel
         self.num_features = num_features
         self.embedding = 2048
+        self.backbone = backbone.eval()
 
         if bool(self.args.linear):
             self.mlp = nn.Linear(self.embedding, self.num_features)
@@ -29,6 +31,8 @@ class Classifier(L.LightningModule):
                 nn.ReLU(),
                 nn.Linear(self.embedding, self.num_features),
             )
+
+        print(self.mlp)
 
         if self.multilabel:
             self.loss = nn.BCEWithLogitsLoss()
@@ -40,21 +44,29 @@ class Classifier(L.LightningModule):
         self.test_outputs = []
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        with torch.no_grad():
+            x = self.backbone(x)
+        if len(x.shape) == 3:
+            x = torch.mean(x, dim=1, keepdim=True)
         x = self.mlp(x)
         return x
 
-    def _interal_forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-        return self.mlp(x), y
+    def _interal_forward(self, x: torch.Tensor) -> torch.Tensor:
+        with torch.no_grad():
+            x = self.backbone(x)
+        if len(x.shape) == 3:
+            x = torch.mean(x, dim=1, keepdim=True)
+        return self.mlp(x)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        x, y = self._interal_forward(x, y)
+        x = self._interal_forward(x)
         loss = self.loss(x, y)
         self.log("train_loss", loss)
         return loss
 
     def evaluation_step(self, x, y) -> dict:
-        x, y = self._interal_forward(x, y)
+        x = self._interal_forward(x)
         loss = self.loss(x, y).cpu().numpy()
         if self.multilabel:
             predictions = torch.sigmoid(x).cpu().numpy()
