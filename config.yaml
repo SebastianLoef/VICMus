@@ -12,10 +12,10 @@ vicreg:
 
 # Evaluation
 evaluation:
-  batch_size: 50
-  lr: 0.32
-  weight_decay : 0.000015
-  momentum: 0.53
+  batch_size: 1024
+  lr: 0.1
+  weight_decay : 0.00001
+  momentum: 0.9
   linear: 1
 
 # training general
