@@ -68,8 +68,8 @@ def main(args):
     dataset = get_dataset(args.dataset)
     train_dataset = dataset(subset="train", transforms=transforms)
     val_dataset = dataset(subset="valid", transforms=transforms)
-    test_dataset = dataset(subset="test", transforms=transforms)
-    test_dataset = TestDataset(args, test_dataset)
+    test_dataset = dataset(subset="test", transforms=None)
+    test_dataset = TestDataset(backbone_args, test_dataset)
 
     train_dataloader = DataLoader(
         train_dataset,
@@ -86,7 +86,7 @@ def main(args):
         pin_memory=True,
     )
     test_dataloader = DataLoader(
-        test_dataset, batch_size=1, shuffle=False, num_workers=0, pin_memory=True
+        test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True
     )
 
     MULTILABELS = train_dataset.MULTILABEL
