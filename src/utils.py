@@ -3,6 +3,7 @@ import re
 import glob
 import json
 import names
+import torch
 from types import SimpleNamespace
 import numpy as np
 from tqdm import tqdm
@@ -10,7 +11,9 @@ from data.gtzan import GTZAN
 from data.magnatagatune import MagnaTagATune
 from data.millionsongdataset import MillionSongDataset
 from data.freemusicarchive import FreeMusicArchive
-
+from data.nsynth import NSynthInstrument, NSynthPitch
+#import wget
+import shutil
 
 def generate_encodings(args, module, dataset, subset, normalize=False):
     path = f"data/models/{args.name}/{args.dataset}"
@@ -89,8 +92,13 @@ def get_dataset(name: str):
     elif name == "msd":
         print("Using MillionSongDataset dataset")
         return MillionSongDataset
-    else:
-        raise NotImplementedError
+    elif "nsynth" in name:
+        if "instrument" in name:
+            return NSynthInstrument
+        elif "pitch" in name:
+            return NSynthPitch
+
+    raise NotImplementedError
 
 
 def save_parameters(args, name):
@@ -104,7 +112,20 @@ def load_parameters(name):
     with open(f"data/models/{name}/parameters.json", "r") as f:
         return SimpleNamespace(**json.load(f))
 
-
+def class_balanced_sampler(dataset):
+    labels = list(dataset.binary.values())
+    print(len(labels))
+    labels = np.array(labels)
+    print(labels.shape)
+    labels = np.argmax(labels, axis=1)
+    class_counts = np.bincount(labels)
+    weights = 1.0 / class_counts
+    samples_weights = weights[labels]
+    sampler = torch.utils.data.WeightedRandomSampler(
+        samples_weights, len(samples_weights), replacement=True
+    )
+    return sampler
+        
 if __name__ == "__main__":
     path = get_epoch_checkpoint_path("irma_orourke-17")
     print(path)

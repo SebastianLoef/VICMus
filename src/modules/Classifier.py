@@ -54,8 +54,6 @@ class Classifier(L.LightningModule):
     def _interal_forward(self, x: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
             x = self.backbone(x)
-        #if len(x.shape) == 3:
-        #    x = torch.mean(x, dim=1, keepdim=True)
         return self.mlp(x)
 
     def training_step(self, batch, batch_idx):
@@ -76,7 +74,7 @@ class Classifier(L.LightningModule):
         if self.multilabel:
             predictions = torch.sigmoid(x).cpu().numpy()
         else:
-            predictions = torch.argmax(x, dim=1).cpu().numpy()
+            predictions = torch.softmax(x, dim=0).cpu().numpy()
         labels = y.cpu().numpy()
         return {"loss": loss, "predictions": predictions, "labels": labels}
 
@@ -98,13 +96,10 @@ class Classifier(L.LightningModule):
         if self.multilabel:
             roc_auc = metrics.roc_auc_score(labels, predictions, average="macro")
             self.log(f"{key}_roc_auc", roc_auc)
-            average_precision = metrics.average_precision_score(
-                labels, predictions, average="macro"
-            )
-            self.log(f"{key}_pr_auc", average_precision)
-
-        else:
-            self.log(f"{key}_acc", metrics.accuracy_score(labels, predictions))
+        average_precision = metrics.average_precision_score(
+            labels, predictions, average="macro"
+        )
+        self.log(f"{key}_pr_auc", average_precision)
 
     def on_validation_epoch_end(self) -> None:
         self.__on_epoch_end(self.val_outputs, "val")

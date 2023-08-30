@@ -15,7 +15,9 @@ class TestDataset(Dataset):
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         audio, label = self.dataset[index]
         batch = torch.split(audio, self.n_samples, dim=1)
-        batch = torch.cat(batch[:-1], dim=0)
+        last_part = audio[:, -self.n_samples:]
+        batch = batch[:-1] + (last_part,)
+        batch = torch.cat(batch, dim=0)
         batch = batch.unsqueeze(dim=1)
         batch = self.melspec(batch)
         return batch, label
