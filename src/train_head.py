@@ -18,6 +18,7 @@ from utils import (
     get_epoch_checkpoint_path,
     get_model_number,
     load_parameters,
+    class_balanced_sampler
 )
 
 from data.test_dataset import TestDataset
@@ -70,11 +71,17 @@ def main(args):
     val_dataset = dataset(subset="valid", transforms=transforms)
     test_dataset = dataset(subset="test", transforms=None)
     test_dataset = TestDataset(backbone_args, test_dataset)
-
+    if args.class_balanced:
+        sampler = class_balanced_sampler(train_dataset)
+        shuffle=False
+    else:
+        sampler = None
+        shuffle=True
     train_dataloader = DataLoader(
         train_dataset,
+        sampler=sampler,
         batch_size=args.batch_size,
-        shuffle=True,
+        shuffle=shuffle,
         num_workers=args.num_workers,
         pin_memory=True,
     )
@@ -150,6 +157,7 @@ def main(args):
         precision=32,
         num_sanity_val_steps=0,
         devices=args.devices,
+        check_val_every_n_epoch=args.check_val_every_n_epoch
     )
     trainer.fit(
         model,
