@@ -9,14 +9,6 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from data.freemusicarchive import FreeMusicArchive
-from data.gtzan import GTZAN
-from data.magnatagatune import MagnaTagATune
-from data.millionsongdataset import MillionSongDataset
-from data.nsynth import NSynthInstrument, NSynthPitch
-
-# import wget
-
 
 def generate_encodings(args, module, dataset, subset, normalize=False):
     path = f"data/models/{args.name}/{args.dataset}"
@@ -80,28 +72,6 @@ def get_epoch_checkpoint_path(name: str, epoch: int = 0) -> str:
 
     idx = max(d.keys())
     return d[idx]
-
-
-def get_dataset(name: str):
-    if name == "mtat":
-        print("Using MagnaTagATune dataset")
-        return MagnaTagATune
-    elif name == "fma":
-        print("Using FreeMusicArchive dataset")
-        return FreeMusicArchive
-    elif name == "gtzan":
-        print("Using GTZAN dataset")
-        return GTZAN
-    elif name == "msd":
-        print("Using MillionSongDataset dataset")
-        return MillionSongDataset
-    elif "nsynth" in name:
-        if "instrument" in name:
-            return NSynthInstrument
-        elif "pitch" in name:
-            return NSynthPitch
-
-    raise NotImplementedError
 
 
 def save_parameters(args, name):

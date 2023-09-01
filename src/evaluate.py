@@ -1,21 +1,17 @@
 import argparse
 
-import lightning as L
-import numpy as np
 import yaml
 from sklearn import metrics
-from sklearn.linear_model import LinearRegression, LogisticRegression, SGDRegressor
+from sklearn.linear_model import SGDRegressor
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.multioutput import ClassifierChain
-from sklearn.tree import DecisionTreeRegressor
 
-from architectures import resnet
-from modules.VICReg import VICReg
-from transforms import MelSpectrogram
-from utils import (
+from src.architectures import resnet
+from src.data import DATASETS
+from src.modules.VICReg import VICReg
+from src.transforms import MelSpectrogram
+from src.utils import (
     generate_encodings,
     get_best_metric_checkpoint_path,
-    get_dataset,
     get_epoch_checkpoint_path,
     load_parameters,
 )
@@ -91,11 +87,9 @@ def main(args):
     # datasets
     ############################
     transforms = MelSpectrogram(backbone_args)
-    train_dataset = get_dataset(args.train_dataset)(
-        subset="train", transforms=transforms
-    )
-    val_dataset = get_dataset(args.val_dataset)(subset="valid", transforms=transforms)
-    test_dataset = get_dataset(args.test_dataset)(subset="test", transforms=transforms)
+    train_dataset = DATASETS[args.dataset](subset="train", transforms=transforms)
+    val_dataset = DATASETS[args.val_dataset](subset="valid", transforms=transforms)
+    test_dataset = DATASETS[args.test_dataset](subset="test", transforms=transforms)
 
     ############################
     # model

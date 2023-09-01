@@ -1,10 +1,9 @@
 from typing import Tuple
 
 import torch
-import torch.nn as nn
 from torch.utils.data import Dataset
 
-from transforms import MelSpectrogram
+from src.transforms import MelSpectrogram
 
 
 class ClipsDataset(Dataset):

@@ -8,14 +8,14 @@ from lightning.pytorch.utilities.types import TRAIN_DATALOADERS
 from torch import Tensor
 from torch.utils.data import DataLoader
 
-from architectures import mlp
-from optimizers import LARS, adjust_learning_rate, include_bias_and_norm
-from transforms import AudioSplit
-from utils import get_dataset, off_diagonal
+from src.architectures import mlp
+from src.optimizers import LARS, adjust_learning_rate, include_bias_and_norm
+from src.transforms import AudioSplit
+from src.utils import off_diagonal
 
 
 class VICReg(L.LightningModule):
-    def __init__(self, args, backbone):
+    def __init__(self, args, dataset, backbone):
         super().__init__()
         self.args = args
         self.num_features = int(args.projector.split("-")[-1])
@@ -23,6 +23,7 @@ class VICReg(L.LightningModule):
         self.projector = mlp(args.projector)
         self.val_outputs = []
         self.train_outputs = []
+        self.dataset = dataset
 
     def internal_forward(self, x: Tensor, y: Tensor) -> Tuple[Tensor, Tensor]:
         x = self.projector(self.backbone(x))
@@ -103,9 +104,10 @@ class VICReg(L.LightningModule):
         return optimizer
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        dataset = get_dataset(self.args.dataset)
         return DataLoader(
-            dataset("train", transforms=AudioSplit(self.args), mixing=self.args.mixing),
+            self.dataset(
+                "train", transforms=AudioSplit(self.args), mixing=self.args.mixing
+            ),
             batch_size=self.args.batch_size,
             shuffle=True,
             num_workers=self.args.num_workers,
