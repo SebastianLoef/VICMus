@@ -2,7 +2,7 @@ import argparse
 
 import yaml
 import lightning as L
-from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from lightning.pytorch.loggers import WandbLogger
 from torch.utils.data import DataLoader
 from torchaudio_augmentations import RandomResizedCrop
@@ -144,6 +144,9 @@ def main(args):
             filename="classifier" + "-{epoch:02d}",
             save_top_k=-1,
         )
+    )
+    checkpoint_callbacks.append(
+        LearningRateMonitor(logging_interval="step")
     )
 
     ############################
