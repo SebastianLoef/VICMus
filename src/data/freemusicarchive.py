@@ -3,11 +3,13 @@ import random
 from typing import Tuple
 
 import pandas as pd
+import random
 
 import torchaudio
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchaudio.transforms import Resample
+import numpy as np 
 
 class FreeMusicArchive(Dataset):
     NUM_LABELS = None
@@ -17,11 +19,13 @@ class FreeMusicArchive(Dataset):
                  root: str = "data/processed/FMA/fma_medium/", 
                  sample_rate: int=22050,
                  transforms=None,
+                 mixing=False,
                  **kwargs) -> None:
         super().__init__()
         self.root = root
         self.sample_rate = sample_rate
         self.transforms = transforms
+        self.mixing = mixing
         self.subset = subset
         # Broken files to be removed :(
         self.broken_FMA = [316, 977, 10675, 13146, 15626, 
@@ -31,7 +35,8 @@ class FreeMusicArchive(Dataset):
         self.df = self._get_song_list()
         self.df["mp3_path"] = self.df.mp3_path.apply(lambda x: os.path.join(self.root, x))
 
-    def __getitem__(self, index) -> Tuple[Tensor, int]:
+
+    def _load_audio(self, index):
         audio_path, _ = self.df.iloc[index, 1:]
         audio, sr = torchaudio.load(audio_path, format='mp3')
         if sr != self.sample_rate:
@@ -40,6 +45,15 @@ class FreeMusicArchive(Dataset):
         
         if audio.shape[0] == 2:
             audio = audio.mean(dim=0, keepdim=True)
+        return audio
+    def __getitem__(self, index) -> Tuple[Tensor, int]:
+        audio = self._load_audio(index)
+        if self.mixing:
+            new_idx = random.randint(0, len(self))
+            new_audio = self._load_audio(index)
+            p = np.random.beta(5, 2)
+            audio = audio * p + new_audio * (1 - p)
+
         if self.transforms:
             audio = self.transforms(audio)
         return audio, Tensor(1)

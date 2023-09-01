@@ -36,11 +36,12 @@ general:
   # Audio
   sample_rate: 22050
   n_samples: 65024
+  mixing: 1
 
   # Mel Spectrogram
   n_fft: 1024
   win_length: 1024
   hop_length: 512
-  f_min: 20
-  f_max: 11000
+  f_min: 0
+  f_max: 11050
   normalize: 1
