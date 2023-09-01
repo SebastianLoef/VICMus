@@ -56,20 +56,26 @@ def main(args):
     ###########################
     # transforms
     ############################
-    transforms = Compose(
-        [
-            RandomResizedCrop(n_samples=backbone_args.n_samples),
-            MelSpectrogram(backbone_args),
-        ]
-    )
+    if "nsynth" in args.dataset:
+        transforms = MelSpectrogram(backbone_args)
+    else:
+        transforms = Compose(
+            [
+                RandomResizedCrop(n_samples=backbone_args.n_samples),
+                MelSpectrogram(backbone_args),
+            ]
+        )
     ############################
     # dataset
     ############################
     dataset = get_dataset(args.dataset)
     train_dataset = dataset(subset="train", transforms=transforms)
     val_dataset = dataset(subset="valid", transforms=transforms)
-    test_dataset = dataset(subset="test", transforms=None)
-    test_dataset = TestDataset(backbone_args, test_dataset)
+    if "nsynth" in args.dataset:
+        test_dataset = dataset(subset="test", transforms=transforms)
+    else:
+        test_dataset = dataset(subset="test", transforms=None)
+        test_dataset = TestDataset(backbone_args, test_dataset)
     if args.class_balanced:
         sampler = class_balanced_sampler(train_dataset)
         shuffle = False
