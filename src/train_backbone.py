@@ -5,9 +5,10 @@ import yaml
 from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.loggers import WandbLogger
 
-from architectures import resnet
-from modules.VICReg import VICReg
-from utils import get_model_name, get_model_number, save_parameters
+from src.architectures import resnet
+from src.data import DATASETS
+from src.modules.VICReg import VICReg
+from src.utils import get_model_name, get_model_number, save_parameters
 
 
 def get_arguments():
@@ -45,7 +46,8 @@ def main(args):
     # model
     ############################
     backbone = resnet(args.pretrained)
-    model = VICReg(args, backbone)
+    dataset = DATASETS[args.dataset]
+    model = VICReg(args, dataset, backbone)
     checkpoint = ModelCheckpoint(
         dirpath=f"data/models/{name}",
         filename="vicreg-{epoch:02d}",

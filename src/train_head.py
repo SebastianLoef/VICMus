@@ -8,15 +8,15 @@ from torch.utils.data import DataLoader
 from torchaudio_augmentations import RandomResizedCrop
 from torchvision.transforms import Compose
 
-from architectures import resnet
-from data.test_dataset import TestDataset
-from modules.Classifier import Classifier
-from modules.VICReg import VICReg
-from transforms import MelSpectrogram
-from utils import (
+from src.architectures import resnet
+from src.data import DATASETS
+from src.data.clips_dataset import ClipsDataset
+from src.modules.Classifier import Classifier
+from src.modules.VICReg import VICReg
+from src.transforms import MelSpectrogram
+from src.utils import (
     class_balanced_sampler,
     get_best_metric_checkpoint_path,
-    get_dataset,
     get_epoch_checkpoint_path,
     get_model_number,
     load_parameters,
@@ -68,14 +68,14 @@ def main(args):
     ############################
     # dataset
     ############################
-    dataset = get_dataset(args.dataset)
+    dataset = DATASETS[backbone_args.dataset]
     train_dataset = dataset(subset="train", transforms=transforms)
     val_dataset = dataset(subset="valid", transforms=transforms)
     if "nsynth" in args.dataset:
         test_dataset = dataset(subset="test", transforms=transforms)
     else:
         test_dataset = dataset(subset="test", transforms=None)
-        test_dataset = TestDataset(backbone_args, test_dataset)
+        test_dataset = ClipsDataset(backbone_args, test_dataset)
     if args.class_balanced:
         sampler = class_balanced_sampler(train_dataset)
         shuffle = False
@@ -111,8 +111,9 @@ def main(args):
     # model
     ############################
     print(backbone_path)
+    dataset = DATASETS[backbone_args.dataset]
     backbone_module = VICReg.load_from_checkpoint(
-        backbone_path, args=backbone_args, backbone=resnet()
+        backbone_path, args=backbone_args, dataset=dataset, backbone=resnet()
     )
     backbone = backbone_module.backbone.cpu()
     model = Classifier(args, MULTILABELS, NUM_LABELS, backbone)

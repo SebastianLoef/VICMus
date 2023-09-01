@@ -1,2 +1,5 @@
 [tool.isort]
 profile = "black"
+
+[tool.autoflake]
+remove_all_unused_imports = true

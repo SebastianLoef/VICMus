@@ -1,13 +1,12 @@
 from typing import Tuple
 
 import torch
-import torch.nn as nn
 from torch.utils.data import Dataset
 
-from transforms import MelSpectrogram
+from src.transforms import MelSpectrogram
 
 
-class TestDataset(Dataset):
+class ClipsDataset(Dataset):
     def __init__(self, args, dataset: Dataset) -> None:
         super().__init__()
         self.dataset = dataset
@@ -33,7 +32,7 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
 
     dataset = MagnaTagATune("test")
-    tdataset = TestDataset(dataset)
+    tdataset = ClipsDataset(dataset)
     loader = DataLoader(tdataset, batch_size=1, shuffle=False)
 
     for batch, label in loader:
