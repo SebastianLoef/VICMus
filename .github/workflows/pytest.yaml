@@ -13,7 +13,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: make requirements
 
       - name: Install test runner
         run: pip install pytest pytest-cov
