@@ -68,7 +68,7 @@ def main(args):
     ############################
     # dataset
     ############################
-    dataset = DATASETS[backbone_args.dataset]
+    dataset = DATASETS[args.dataset]
     train_dataset = dataset(subset="train", transforms=transforms)
     val_dataset = dataset(subset="valid", transforms=transforms)
     if "nsynth" in args.dataset:
