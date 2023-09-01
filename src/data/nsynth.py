@@ -48,7 +48,7 @@ class NSynth(Dataset):
         audio = torch.mean(audio, dim=0, keepdim=True)
         if self.transforms:
             audio = self.transforms(audio)
-        return audio, FloatTensor(self.labels[index])
+        return audio, torch.tensor(self.labels[index])
         
     def load_data(self, data_folder: str) -> dict:
         with open(os.path.join(data_folder, "examples.json")) as f:
@@ -57,10 +57,7 @@ class NSynth(Dataset):
         labels = []
         for key in data.keys():
             file_paths.append(os.path.join(data_folder, "audio", f"{key}.wav"))
-            label = [0] * self.NUM_LABELS
-            label[data[key][self._label]] = 1
-            labels.append(label)
-
+            labels.append(data[key][self._label])
         return file_paths, labels
         
     def download(self):

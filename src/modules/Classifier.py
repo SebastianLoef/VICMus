@@ -74,7 +74,7 @@ class Classifier(L.LightningModule):
         if self.multilabel:
             predictions = torch.sigmoid(x).cpu().numpy()
         else:
-            predictions = torch.softmax(x, dim=0).cpu().numpy()
+            predictions = torch.argmax(x, dim=1).cpu().numpy()
         labels = y.cpu().numpy()
         return {"loss": loss, "predictions": predictions, "labels": labels}
 
@@ -96,11 +96,16 @@ class Classifier(L.LightningModule):
         if self.multilabel:
             roc_auc = metrics.roc_auc_score(labels, predictions, average="macro")
             self.log(f"{key}_roc_auc", roc_auc)
-        average_precision = metrics.average_precision_score(
-            labels, predictions, average="macro"
-        )
-        self.log(f"{key}_pr_auc", average_precision)
-
+            average_precision = metrics.average_precision_score(
+                labels, predictions, average="macro"
+            )
+            self.log(f"{key}_pr_auc", average_precision)
+        else:
+            accuracy = metrics.accuracy_score(
+                labels, predictions, normalize=True
+            )
+            self.log(f"{key}_accuracy", accuracy)
+            
     def on_validation_epoch_end(self) -> None:
         self.__on_epoch_end(self.val_outputs, "val")
         self.val_outputs = []
