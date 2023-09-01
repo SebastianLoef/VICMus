@@ -1,17 +1,17 @@
 from typing import Tuple
-from lightning.pytorch.utilities.types import TRAIN_DATALOADERS
 
+import lightning as L
 import numpy as np
 import torch
-from torch import Tensor
 import torch.nn.functional as F
-import lightning as L
-
-from utils import off_diagonal, get_dataset
-from optimizers import LARS, adjust_learning_rate, include_bias_and_norm
-from architectures import mlp
+from lightning.pytorch.utilities.types import TRAIN_DATALOADERS
+from torch import Tensor
 from torch.utils.data import DataLoader
+
+from architectures import mlp
+from optimizers import LARS, adjust_learning_rate, include_bias_and_norm
 from transforms import AudioSplit
+from utils import get_dataset, off_diagonal
 
 
 class VICReg(L.LightningModule):

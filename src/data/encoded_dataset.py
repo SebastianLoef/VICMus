@@ -1,11 +1,13 @@
+from typing import Optional, Tuple
+
+import lightning as L
 import torch
 import torch.nn as nn
 from torch import Tensor
-from utils import generate_encodings, get_dataset
-from typing import Tuple, Optional
-import lightning as L
 from torchvision.transforms import Compose
-from transforms import RandomResizedCrop, MelSpectrogram
+
+from transforms import MelSpectrogram, RandomResizedCrop
+from utils import generate_encodings, get_dataset
 
 
 class EncodedDataset(nn.Module):

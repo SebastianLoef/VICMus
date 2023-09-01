@@ -1,14 +1,13 @@
 import argparse
 
-import yaml
 import lightning as L
-
-from utils import save_parameters
+import yaml
 from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.loggers import WandbLogger
-from modules.VICReg import VICReg
-from utils import get_model_name, get_model_number
+
 from architectures import resnet
+from modules.VICReg import VICReg
+from utils import get_model_name, get_model_number, save_parameters
 
 
 def get_arguments():
@@ -48,12 +47,12 @@ def main(args):
     backbone = resnet(args.pretrained)
     model = VICReg(args, backbone)
     checkpoint = ModelCheckpoint(
-            dirpath=f"data/models/{name}",
-            filename="vicreg-{epoch:02d}",
-            save_top_k=-1,
-            every_n_epochs=50,
-            save_weights_only=True,
-        )
+        dirpath=f"data/models/{name}",
+        filename="vicreg-{epoch:02d}",
+        save_top_k=-1,
+        every_n_epochs=50,
+        save_weights_only=True,
+    )
     ############################
     # Training
     ############################

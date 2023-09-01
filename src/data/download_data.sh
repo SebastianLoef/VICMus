@@ -43,7 +43,7 @@ echo "################################"
 echo "Downloading data"
 echo "################################"
 for i in ${data[@]};
-do 
+do
     echo "Check if $i is already downloaded"
     download_data "$i" "$(split_url "$i")"
 done

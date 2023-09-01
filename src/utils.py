@@ -1,19 +1,22 @@
-import os
-import re
 import glob
 import json
-import names
-import torch
+import os
+import re
 from types import SimpleNamespace
+
+import names
 import numpy as np
+import torch
 from tqdm import tqdm
+
+from data.freemusicarchive import FreeMusicArchive
 from data.gtzan import GTZAN
 from data.magnatagatune import MagnaTagATune
 from data.millionsongdataset import MillionSongDataset
-from data.freemusicarchive import FreeMusicArchive
 from data.nsynth import NSynthInstrument, NSynthPitch
-#import wget
-import shutil
+
+# import wget
+
 
 def generate_encodings(args, module, dataset, subset, normalize=False):
     path = f"data/models/{args.name}/{args.dataset}"
@@ -112,6 +115,7 @@ def load_parameters(name):
     with open(f"data/models/{name}/parameters.json", "r") as f:
         return SimpleNamespace(**json.load(f))
 
+
 def class_balanced_sampler(dataset):
     labels = list(dataset.binary.values())
     print(len(labels))
@@ -125,7 +129,8 @@ def class_balanced_sampler(dataset):
         samples_weights, len(samples_weights), replacement=True
     )
     return sampler
-        
+
+
 if __name__ == "__main__":
     path = get_epoch_checkpoint_path("irma_orourke-17")
     print(path)
