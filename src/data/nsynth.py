@@ -29,7 +29,7 @@ class NSynth(Dataset):
         self.sample_rate = sample_rate
         data_folder = os.path.join(root, "processed", "nsynth", f"nsynth-{self.subset}")
         if not os.path.exists(data_folder):
-            self.download()
+            self.download(root)
         self.file_paths, self.labels = self.load_data(data_folder)
 
     @property
@@ -59,11 +59,11 @@ class NSynth(Dataset):
             labels.append(data[key][self._label])
         return file_paths, labels
 
-    def download(self):
-        if not os.path.exists(self.root):
-            os.makedirs(self.root)
+    def download(self, root):
+        if not os.path.exists(root):
+            os.makedirs(root)
         url = f"http://download.magenta.tensorflow.org/datasets/nsynth/nsynth-{self.subset}.jsonwav.tar.gz"
-        download_and_extract(url, self.root, "nsynth")
+        download_and_extract(url, root, "nsynth")
 
     def __len__(self):
         return len(self.file_paths)
