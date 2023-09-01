@@ -6,8 +6,8 @@ import torch.nn as nn
 from torch import Tensor
 from torchvision.transforms import Compose
 
-from transforms import MelSpectrogram, RandomResizedCrop
-from utils import generate_encodings, get_dataset
+from src.transforms import MelSpectrogram, RandomResizedCrop
+from src.utils import generate_encodings
 
 
 class EncodedDataset(nn.Module):
@@ -31,7 +31,7 @@ class EncodedDataset(nn.Module):
                 MelSpectrogram(backbone_args),
             ]
         )
-        dataset = get_dataset(args.dataset)(subset=subset, transforms=transforms)
+        dataset = DATASETS[args.dataset](subset=subset, transforms=transforms)
         self.MULTILABEL = dataset.MULTILABEL
         self.NUM_LABELS = dataset.NUM_LABELS
         return dataset

@@ -3,7 +3,6 @@ import os
 import shutil
 from typing import Tuple
 
-import pandas as pd
 import requests
 import torch
 import torchaudio
