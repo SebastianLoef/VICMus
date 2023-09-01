@@ -9,7 +9,7 @@ from torchaudio_augmentations import RandomResizedCrop
 from torchvision.transforms import Compose
 
 from architectures import resnet
-from data.test_dataset import TestDataset
+from data.test_dataset import ClipsDataset
 from modules.Classifier import Classifier
 from modules.VICReg import VICReg
 from transforms import MelSpectrogram
@@ -69,7 +69,7 @@ def main(args):
     train_dataset = dataset(subset="train", transforms=transforms)
     val_dataset = dataset(subset="valid", transforms=transforms)
     test_dataset = dataset(subset="test", transforms=None)
-    test_dataset = TestDataset(backbone_args, test_dataset)
+    test_dataset = ClipsDataset(backbone_args, test_dataset)
     if args.class_balanced:
         sampler = class_balanced_sampler(train_dataset)
         shuffle = False
