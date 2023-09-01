@@ -90,7 +90,7 @@ target/
 
 # data old
 /data_old/
-# exlude wandb 
+# exlude wandb
 /wandb/
 
 # exclude msd

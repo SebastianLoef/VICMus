@@ -1,15 +1,15 @@
+import json
 import os
-import torchaudio
-import torch
+import shutil
+from typing import Tuple
+
 import pandas as pd
+import requests
+import torch
+import torchaudio
+from torch import FloatTensor, Tensor
 from torch.utils.data import Dataset
 from torchaudio.transforms import Resample
-from torch import Tensor, FloatTensor
-from typing import Tuple
-import shutil
-
-import requests
-import json
 
 
 class NSynth(Dataset):
@@ -33,7 +33,7 @@ class NSynth(Dataset):
             self.download()
         self.file_paths, self.labels = self.load_data(data_folder)
 
-    @property    
+    @property
     def _label(self) -> str:
         pass
 
@@ -49,7 +49,7 @@ class NSynth(Dataset):
         if self.transforms:
             audio = self.transforms(audio)
         return audio, torch.tensor(self.labels[index])
-        
+
     def load_data(self, data_folder: str) -> dict:
         with open(os.path.join(data_folder, "examples.json")) as f:
             data = json.load(f)
@@ -59,7 +59,7 @@ class NSynth(Dataset):
             file_paths.append(os.path.join(data_folder, "audio", f"{key}.wav"))
             labels.append(data[key][self._label])
         return file_paths, labels
-        
+
     def download(self):
         if not os.path.exists(self.root):
             os.makedirs(self.root)
@@ -68,10 +68,11 @@ class NSynth(Dataset):
 
     def __len__(self):
         return len(self.file_paths)
-    
+
 
 class NSynthPitch(NSynth):
     NUM_LABELS = 128
+
     @property
     def _label(self) -> str:
         return "pitch"
@@ -79,17 +80,18 @@ class NSynthPitch(NSynth):
 
 class NSynthInstrument(NSynth):
     NUM_LABELS = 11
+
     @property
     def _label(self) -> str:
         return "instrument_family"
 
+
 def extract(file_path, target_folder):
-    """
-    Extracts a zip file to a target folder and removes zip file
-    """
+    """Extracts a zip file to a target folder and removes zip file."""
     if not os.path.exists(target_folder):
         os.makedirs(target_folder)
     shutil.unpack_archive(file_path, target_folder)
+
 
 def download_url(url, target_folder):
     # download into raw folder
@@ -103,7 +105,7 @@ def download_url(url, target_folder):
             if chunk:
                 f.write(chunk)
     return file_path
-        
+
 
 def download_and_extract(url, root, name):
     print(f"Downloading from {url}")
@@ -116,4 +118,3 @@ def download_and_extract(url, root, name):
 
     print(f"Cleaning up {name}")
     os.remove(file_path)
-

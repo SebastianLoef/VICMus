@@ -1,10 +1,11 @@
 import os
-import torchaudio
+from typing import Tuple
+
 import pandas as pd
+import torchaudio
+from torch import FloatTensor, Tensor
 from torch.utils.data import Dataset
 from torchaudio.transforms import Resample
-from torch import Tensor, FloatTensor
-from typing import Tuple
 
 
 class MillionSongDataset(Dataset):

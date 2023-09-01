@@ -1,27 +1,26 @@
 import argparse
 
-import yaml
 import lightning as L
-from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
+import yaml
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.loggers import WandbLogger
 from torch.utils.data import DataLoader
 from torchaudio_augmentations import RandomResizedCrop
 from torchvision.transforms import Compose
-from transforms import MelSpectrogram
+
 from architectures import resnet
+from data.test_dataset import TestDataset
 from modules.Classifier import Classifier
 from modules.VICReg import VICReg
-
+from transforms import MelSpectrogram
 from utils import (
+    class_balanced_sampler,
     get_best_metric_checkpoint_path,
     get_dataset,
     get_epoch_checkpoint_path,
     get_model_number,
     load_parameters,
-    class_balanced_sampler
 )
-
-from data.test_dataset import TestDataset
 
 
 def get_arguments():
@@ -73,10 +72,10 @@ def main(args):
     test_dataset = TestDataset(backbone_args, test_dataset)
     if args.class_balanced:
         sampler = class_balanced_sampler(train_dataset)
-        shuffle=False
+        shuffle = False
     else:
         sampler = None
-        shuffle=True
+        shuffle = True
     train_dataloader = DataLoader(
         train_dataset,
         sampler=sampler,
@@ -93,7 +92,11 @@ def main(args):
         pin_memory=True,
     )
     test_dataloader = DataLoader(
-        test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True
+        test_dataset,
+        batch_size=1,
+        shuffle=False,
+        num_workers=args.num_workers,
+        pin_memory=True,
     )
 
     MULTILABELS = train_dataset.MULTILABEL
@@ -145,9 +148,7 @@ def main(args):
             save_top_k=-1,
         )
     )
-    checkpoint_callbacks.append(
-        LearningRateMonitor(logging_interval="step")
-    )
+    checkpoint_callbacks.append(LearningRateMonitor(logging_interval="step"))
 
     ############################
     # Training
@@ -160,7 +161,7 @@ def main(args):
         precision=32,
         num_sanity_val_steps=0,
         devices=args.devices,
-        check_val_every_n_epoch=args.check_val_every_n_epoch
+        check_val_every_n_epoch=args.check_val_every_n_epoch,
     )
     trainer.fit(
         model,

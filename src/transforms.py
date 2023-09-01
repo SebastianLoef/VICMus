@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Union
+from typing import Tuple
 
 import torch
 import torch.nn as nn
@@ -7,13 +7,13 @@ from torchaudio_augmentations import (
     Compose,
     Delay,
     Gain,
+    HighLowPass,
     Noise,
     PitchShift,
-    Reverb,
     PolarityInversion,
     RandomApply,
     RandomResizedCrop,
-    HighLowPass,
+    Reverb,
 )
 
 
@@ -36,6 +36,7 @@ def get_transforms(
     )
     return transform
 
+
 class MelSpectrogram(nn.Module):
     def __init__(
         self,
@@ -49,7 +50,7 @@ class MelSpectrogram(nn.Module):
             f_min=args.f_min,
             f_max=args.f_max,
             sample_rate=args.sample_rate,
-            norm='slaney'
+            norm="slaney",
         )
         self.normalize = args.normalize
 
@@ -63,6 +64,7 @@ class MelSpectrogram(nn.Module):
             melspec = (melspec) / (melspec.max() + 1e-8) * 2 - 1
         melspec = torch.stack([melspec, melspec, melspec], dim=-3).squeeze()
         return melspec
+
 
 class AudioSplit(nn.Module):
     def __init__(

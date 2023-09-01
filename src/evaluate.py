@@ -1,24 +1,25 @@
 import argparse
-import yaml
+
 import lightning as L
-from transforms import MelSpectrogram
+import numpy as np
+import yaml
+from sklearn import metrics
+from sklearn.linear_model import LinearRegression, LogisticRegression, SGDRegressor
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.multioutput import ClassifierChain
+from sklearn.tree import DecisionTreeRegressor
+
 from architectures import resnet
 from modules.VICReg import VICReg
-
+from transforms import MelSpectrogram
 from utils import (
+    generate_encodings,
     get_best_metric_checkpoint_path,
     get_dataset,
     get_epoch_checkpoint_path,
     load_parameters,
 )
 
-from sklearn.linear_model import LogisticRegression, LinearRegression, SGDRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.multioutput import ClassifierChain
-from sklearn import metrics
-import numpy as np
-from utils import generate_encodings
 
 def fit_model(args, module, train_dataset):
     # fit linear model using scikit
@@ -29,17 +30,23 @@ def fit_model(args, module, train_dataset):
     model.fit(encodings, labels)
     return model
 
+
 def evaluate_model(args, module, model, dataset, subset):
     encodings, labels = generate_encodings(args, module, dataset, subset)
     preds = model.predict(encodings)
-    print(preds.shape, labels.shape, )
+    print(
+        preds.shape,
+        labels.shape,
+    )
     return preds, labels
+
 
 def print_results(preds, labels):
     mean_ap = metrics.average_precision_score(labels, preds, average="macro")
     roc_auc = metrics.roc_auc_score(labels, preds, average="macro")
     print(f"mAP: {mean_ap}")
     print(f"ROC AUC: {roc_auc}")
+
 
 def run(args, module, train_dataset, val_dataset, test_dataset):
     print("Fit model")
@@ -50,6 +57,7 @@ def run(args, module, train_dataset, val_dataset, test_dataset):
     print("Evaluate model on test set")
     preds, labels = evaluate_model(args, module, model, test_dataset, "test")
     print_results(preds, labels)
+
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -69,14 +77,13 @@ def get_arguments():
 
 def main(args):
     if args.best_metric is None:
-        metric = "last_epoch"
         backbone_path = get_epoch_checkpoint_path(args.name)
     elif "epoch_" in args.best_metric:
-        metric = args.best_metric
+        args.best_metric
         epoch = int(args.best_metric.split("_")[-1])
         backbone_path = get_epoch_checkpoint_path(args.name, epoch)
     else:
-        metric = args.best_metric
+        args.best_metric
         backbone_path = get_best_metric_checkpoint_path(args.name, args.best_metric)
 
     backbone_args = load_parameters(args.name)
@@ -84,7 +91,9 @@ def main(args):
     # datasets
     ############################
     transforms = MelSpectrogram(backbone_args)
-    train_dataset = get_dataset(args.train_dataset)(subset="train", transforms=transforms)
+    train_dataset = get_dataset(args.train_dataset)(
+        subset="train", transforms=transforms
+    )
     val_dataset = get_dataset(args.val_dataset)(subset="valid", transforms=transforms)
     test_dataset = get_dataset(args.test_dataset)(subset="test", transforms=transforms)
 
@@ -98,6 +107,7 @@ def main(args):
     module.eval()
     module.to("cuda")
     run(args, module, train_dataset, val_dataset, test_dataset)
+
 
 if __name__ == "__main__":
     args = get_arguments()

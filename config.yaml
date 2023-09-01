@@ -14,13 +14,13 @@ vicreg:
 evaluation:
   batch_size: 2048
   lr: 0.1
-  weight_decay : 0.000001
+  weight_decay: 0.000001
   momentum: 0.9
   linear: 1
   class_balanced: 0
 
 # training general
-general: 
+general:
   epochs: 4000
   num_workers: 16
   dataset: nsynth-intrument

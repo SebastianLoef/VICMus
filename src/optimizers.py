@@ -1,10 +1,11 @@
 import math
+
 import torch
 from torch import optim
 
 
 class LARS(optim.Optimizer):
-    """Lars optimizer, code taken from VICReg repo"""
+    """Lars optimizer, code taken from VICReg repo."""
 
     def __init__(
         self,
